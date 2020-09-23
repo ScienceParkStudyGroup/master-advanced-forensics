@@ -1,21 +1,22 @@
 ---
-title: "Introduction"
+title: "Introduction to dataset #1 (gene expressions)"
 teaching: 30
 exercises: 0
 questions:
-- "What can I learn by doing this RNA-Seq lesson?"
-- "What are the tools that I will be using?"
-- "What are the tidy data principles?"
-- "What is working in a more open way beneficial?"
+- "Where does this dataset come from?"
+- "How many genes will I consider in my analysis?"
+- "How many tissues do I have in my dataset?"
+- "In which unit are my gene expression measured?"
 objectives:
-- "Discover in what consists a typical RNA-Seq experiment."
-- "Know what results a RNA-Seq experiment can (and cannot) yield."
+- "Understand what this dataset comprises."
+- "Be able to explain what the values mean and how they were obtained."
 keypoints:
-- "An RNA-Seq experiment is also a normal experiment (control, treated, replication, etc.)."
-- A canonical RNA-Seq experiment consists in RNA library preparation followed by bioinformatic analyses."
-- "RNA-Seq yields a snapshot of individual gene expression levels (count table)."
-- "Upon completion of the bioinformatic steps, the analysis of RNA-Seq results can be done using the DESeq2 R package."
+- "This dataset measures gene expression from various human tissues."
+- "Gene expression is measured from the hybridization of mRNA molecules to microarray probes."
+- "Some tissues have genes that are uniquely or strongly expressed in them which makes them gene-markers of that tissue."
+- "Finding tissue-specific markers can be done through several methods: PCA, clustering or even custom ones."
 ---
+
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -44,15 +45,25 @@ keypoints:
 
 ## Dataset used 
 
-We will make use of a published experimental dataset from a study made on the small model plant _Arabidopsis thaliana_ by [Vogel et al. (2016)](https://doi.org/10.1111/nph.14036). This study compares the response of 4 weeks old plantlets to different bacteria that live on the leaves of different plant species:
-- A known foliar pathogen called _Pseudomonas syringae_ strain DC3000. 
-- A commensal ("neutral") bacteria called _Methylobacterium extorquens_ strain PA1.
-- A commensal ("neutral") bacteria called _Sphingomonas melonis_ strain Fr1. 
-
-<img src="../img/experimental_design.png" width="600px" alt="experimental design" >
-
+The dataset used 
 
 The original sequencing files can be found on the [Array Express database of the European Bioinformatic Institute](https://www.ebi.ac.uk/arrayexpress) by searching for the dataset accession number __E‐MTAB‐4683__.
+
+> ## Question
+> 1. How were gene expression measured? 
+> HintL 
+> > ## Solution
+> > 1. A $$log2$$ equal to 1 means that gene X has a higher expression (x2, two-fold) in the DC3000 infected condition compared to the mock condition. 
+> > 2. A $$log2$$ equal to -1 means that gene X has a smaller expression ($$\frac{1}{2}$$) in the DC3000 infected condition.   
+> >  
+> > ~~~
+> > untreated = 230
+> > treated = 750
+> > log2(treated/untreated) # equals 1.705257
+> > ~~~
+> > {: .language-r}
+> {: .solution}
+{: .challenge}
 
 ## Credits
 
