@@ -19,14 +19,13 @@ keypoints:
 
 - [What is Exploratory Data Analysis?](#what-is-exploratory-data-analysis)
 - [Data import sanity checks](#data-import-sanity-checks)
-- [Getting Descriptive statistics](#getting-descriptive-statistics)
-  - [Yet, eventually, EDA is about getting a better understanding of the studied dataset and preparing its downstream analysis \(e.g. fitting a regression model\).](#yet-eventually-eda-is-about-getting-a-better-understanding-of-the-studied-dataset-and-preparing-its-downstream-analysis-eg-fitting-a-regression-model)
+- [Data exploration](#data-exploration)
+  - [Simple statistical metrics](#simple-statistical-metrics)
+  - [Simple graphical descriptions](#simple-graphical-descriptions)
 - [Describing relationships between the different variables](#describing-relationships-between-the-different-variables)
 - [References](#references)
-- [Photo credits](#photo-credits)
 
 <!-- /MarkdownTOC -->
-
 
 # What is Exploratory Data Analysis?
 EDA (short for Exploratory Data Analysis) can have different purposes:
@@ -43,10 +42,10 @@ Here, we are not going to do all of this. Instead, we will perform some data imp
 # Data import sanity checks
 
 ~~~
-df_expr <- read.csv("data/U133AGNF1B_gcrma_avg.csv", 
-                    header = TRUE, 
-                    stringsAsFactors = FALSE,
-                    check.names = FALSE)
+df_expr <- read.delim(file = "data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.tsv", 
+                 header = TRUE, 
+                 stringsAsFactors = FALSE,
+                 check.names = FALSE)
 ~~~
 {: .language-r}
 
@@ -59,7 +58,7 @@ ncol(df_expr)
 ~~~
 {: .language-r}
 
-This should give you __44,775 genes__ (probes) and __85 tissues__. 
+This should give you __56,202 genes__ (probes) and __53 tissues__ (55 -2 columns: gene id and description). 
 
 How did R "understand" your different data types? 
 ~~~
@@ -69,23 +68,22 @@ glimpse(df)
 
 This command will output this in your console:
 ~~~
-Rows: 44,775
-Columns: 85
-$ probe                              <chr> "1007_s_at", "1053_at", "117_at", "121_at", "1255_g_at", "1294_a…
-$ `721_B_lymphoblasts`               <dbl> 137.00, 81.75, 12.55, 13.00, 5.45, 30.80, 9.75, 7.10, 120.85, 8.…
-$ Adipocyte                          <dbl> 31.10, 7.35, 10.60, 14.55, 4.50, 11.40, 9.15, 6.45, 17.00, 7.80,…
-$ AdrenalCortex                      <dbl> 53.30, 8.90, 14.00, 14.10, 5.00, 13.30, 13.00, 8.10, 20.80, 10.9…
-$ Adrenalgland                       <dbl> 81.20, 7.20, 9.85, 13.70, 3.95, 9.85, 7.95, 5.75, 21.70, 7.35, 3…
-$ Amygdala                           <dbl> 489.35, 8.00, 10.15, 14.30, 4.85, 9.90, 9.65, 6.50, 19.95, 8.20,…
-$ Appendix                           <dbl> 39.50, 13.15, 11.55, 16.45, 5.10, 11.60, 11.30, 7.70, 31.25, 10.…
-$ AtrioventricularNode               <dbl> 20.45, 8.85, 33.60, 15.00, 3.75, 11.45, 11.35, 6.05, 18.95, 9.00…
-$ `BDCA4+_DentriticCells`            <dbl> 17.10, 10.25, 36.15, 17.10, 4.90, 48.10, 9.10, 6.25, 45.80, 7.65…
+Rows: 56,202
+Columns: 55
+$ gene_id                                     <chr> "ENSG00000223972.4", "ENSG00000227232.4", "ENSG00000243…
+$ Description                                 <chr> "DDX11L1", "WASH7P", "MIR1302-11", "FAM138A", "OR4G4P",…
+$ `Adipose - Subcutaneous`                    <dbl> 0.056945, 11.850000, 0.061460, 0.038600, 0.035695, 0.04…
+$ `Adipose - Visceral (Omentum)`              <dbl> 0.05054, 9.75300, 0.05959, 0.03245, 0.00000, 0.03988, 0…
+$ `Adrenal Gland`                             <dbl> 0.074600, 8.023000, 0.081790, 0.040500, 0.034790, 0.049…
+$ `Artery - Aorta`                            <dbl> 0.03976, 12.51000, 0.04297, 0.02815, 0.00000, 0.03399, …
+$ `Artery - Coronary`                         <dbl> 0.04386, 12.30000, 0.05848, 0.03678, 0.00000, 0.00000, …
+$ `Artery - Tibial`                           <dbl> 0.04977, 11.59000, 0.05184, 0.03894, 0.00000, 0.04286, …
 ...(more lines)
 ~~~
 {: .output}
 
 > ## Question
-> 1. Did R convert the "probe" column to a suitable data type?
+> 1. Did R convert the "gene_id" column to a suitable data type?
 > 2. Did R convert all the other columns to a suitable data type?
 >
 > > ## Solution
@@ -102,16 +100,12 @@ head(n = 5)
 
 For big matrix, do `df_expr[1:5,1:5]` to show the first five lines and five columns for instance. 
 
-# Getting Descriptive statistics
+# Data exploration 
 
+## Simple statistical metrics
 
-~~~
-head(n = 5)
-~~~
-{: .language-r}
-
-##
-Yet, eventually, EDA is about getting a better understanding of the studied dataset and preparing its downstream analysis (e.g. fitting a regression model). 
+EDA helps to get a better understanding of the studied dataset and preparing its downstream analysis (e.g. fitting a regression model). 
+We are first going to compute a few descriptive metrics followed by some plotting. 
 
 > ## Question
 > Calculate a series of descriptive metrics on the expression value for all tissues: 
@@ -125,7 +119,7 @@ Yet, eventually, EDA is about getting a better understanding of the studied data
 > > ## Solution
 > > ~~~
 > > df_expr %>% 
-> >   pivot_longer(cols = - probe, 
+> >   pivot_longer(cols = - c(gene_id, Description), 
 > >                names_to = "tissue", 
 > >                values_to = "expression") %>% 
 > >   summarise(max = max(expression), 
@@ -141,26 +135,119 @@ Yet, eventually, EDA is about getting a better understanding of the studied data
 > > # A tibble: 1 x 4
 > >      max   min average median
 > >    <dbl> <dbl>   <dbl>  <dbl>
-> > 1 46508.  0.55    80.0    6.9
+> >  246600  0    16.6    0.00490
 > >~~ 
 > > {: .output}
 > {: .solution}
 {: .challenge}
 
+> ## Discussion
+> 1. What do these gene expression metrics tell you about the spread of data? 
+> 2. Do you think it can have an influence on data representation? If yes, what sort of bias can it introduce?
+> 
+> > ## Solution
+> > 1. As the maximum value is equal to 246600 and the minimum to 0, these data are heavily spread on several orders of magnitude.
+> > 2. Since you will have to represent gene expression values using a common scale, it might be difficult to represent both low and very high expression values. One solution is to scale data or to use a transformation e.g. $$log_{10}$$. 
+> {: .solution}
+{: .challenge}
 
+## Simple graphical descriptions
+
+### One tissue
+
+Since a picture is worth a thousand word, we can generate a few plots to describe our gene expression values, in particular in a tissue-specific way.
+
+First, we need to make our dataframe tidy and save it under a new name (`df_tidy`). Let's do it like this:
+
+~~~
+df_tidy <- df_expr %>% 
+  pivot_longer(cols = - c(gene_id, Description), 
+               names_to = "tissue", 
+               values_to = "expression") 
+~~~
+{: .language-r}
+
+Let's start simple! Let's plot the distribution of gene expression values from _one_ tissue as a boxplot. A [boxplot](https://en.wikipedia.org/wiki/Box_plot) shows the distribution of continuous values, its four quartiles and possible outliers:
+
+* __Minimum :__ the lowest data point excluding any outliers.
+* __Maximum :__ the largest data point excluding any outliers.
+* __Median (Q2 / 50th percentile) :__ the middle value of the dataset.
+* __First quartile (Q1 / 25th percentile) :__ also known as the lower quartile qn(0.25), is the median of the lower half of the dataset.
+* __Third quartile (Q3 / 75th percentile) :__ also known as the upper quartile qn(0.75), is the median of the upper half of the dataset.
+
+
+
+~~~
+df_tidy %>% 
+  dplyr::filter(tissue == "Adipose - Subcutaneous") %>% # the dplyr:: notation makes sure the filter function comes from the dplyr package
+  ggplot(data = ., aes(x = tissue, y = expression)) +
+    geom_boxplot()
+~~~
+{: .language-r}
+
+This will give you the following plot:
+
+<img src="../img/01-boxplot-one-tissue.png" alt="simple boxplot (one tissue)" width="40%">
+
+As you can see, we can retrieve the issue of displaying highly expressed genes together with lowly expressed genes. 
+
+> ## Question
+> Within `ggplot`, find a way to show both low and high gene expression values altogether. 
+> Hint: log10 transform the `y` variable in `aes()`.
+> > ## Solution
+> > ~~~
+> > df_tidy %>% 
+> >   dplyr::filter(tissue == "Adipose - Subcutaneous") %>%   # the dplyr:: notation makes sure the filter function comes from dplyr
+> >   ggplot(data = ., aes(x = tissue, y = log10(expression + 1)) + #  add 1 to the values to avoid -Inf when using $$log_{10}$$ transformation
+> >     geom_boxplot() 
+> > ~~~ 
+> > {: .language-r}
+> {: .solution}
+{: .challenge}
+
+You could also remove the gene values equal to 0 by adding a `dplyr::filter(expression != 0)` line before the `ggplot()` call.
+
+<img src="../img/01-boxplot-one-tissue-no-zero.png" alt="simple boxplot (one tissue) without zero" width="40%">
+
+You can see that the median is now visible since further away from zero. 
+
+### Multiple tissues
+
+Let's now see how these different samples compare to each other in terms of tissue expression.   
+Instead of plotting all tissues, let's plot all brain tissues using a `filter` function call.
+
+~~~
+df_tidy %>%
+  dplyr::filter(expression != 0) %>% 
+  filter(grepl(pattern = "Brain*", x = tissue)) %>% 
+  ggplot(data = ., aes(x = tissue, y = log10(expression + 1), fill = tissue)) + 
+    geom_boxplot(alpha = 0.1) + 
+    theme(axis.text.x = element_text(angle = 90)) +
+    guides(fill=FALSE) 
+~~~
+{: .language-r}
+
+<img src="../img/01-boxplot-brain-tissues.png" alt="boxplot brain tissues" width="40%">
+
+> ## Discussion
+> Try to plot all tissues and not only brain tissues, what issue do you see? 
+{: .discussion}
+
+While boxplots are useful to display a few key metrics, it is hard to compare tissues to each other. Instead, we can overlay distributions on top of each others to identify potential deviant tissues.
+
+~~~
+df_tidy %>% 
+  mutate(log_expression = log10(expression)) %>%     # another way to log-transform your data before plotting 
+  ggplot(data = ., aes(x = log_expression, fill = tissue)) + 
+    geom_density(alpha = 0.1) + 
+    theme(axis.text.x = element_text(angle = 90)) +
+    guides(fill=FALSE)
+~~~
+{: .language-r} 
 
 # Describing relationships between the different variables
     Analyzing relationships between variables
 
 
 # References 
-- [The power analysis section of the RNA-seq blog](https://www.rna-seqblog.com/tag/power-analysis/)
-- [`pwr` R package vignette](https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html)
-- [The Scotty power analysis webtool](http://scotty.genetics.utah.edu/)
-- [UCLA Stat consulting on power analysis](https://stats.idre.ucla.edu/r/dae/power-analysis-for-two-group-independent-sample-t-test/)
--  [Lei et al. (2015) Diminishing returns in next-generation sequencing (NGS) transcriptome data. _Gene_ 557(1):82-87](https://doi.org/10.1016/j.gene.2014.12.013)
-
-# Photo credits
-
-<a style="background-color:black;color:white;text-decoration:none;padding:4px 6px;font-family:-apple-system, BlinkMacSystemFont, &quot;San Francisco&quot;, &quot;Helvetica Neue&quot;, Helvetica, Ubuntu, Roboto, Noto, &quot;Segoe UI&quot;, Arial, sans-serif;font-size:12px;font-weight:bold;line-height:1.2;display:inline-block;border-radius:3px" href="https://unsplash.com/@ayahya09?utm_medium=referral&amp;utm_campaign=photographer-credit&amp;utm_content=creditBadge" target="_blank" rel="noopener noreferrer" title="Download free do whatever you want high-resolution photos from Ali Yahya"><span style="display:inline-block;padding:2px 3px"><svg xmlns="http://www.w3.org/2000/svg" style="height:12px;width:auto;position:relative;vertical-align:middle;top:-2px;fill:white" viewBox="0 0 32 32"><title>unsplash-logo</title><path d="M10 9V0h12v9H10zm12 5h10v18H0V14h10v9h12v-9z"></path></svg></span><span style="display:inline-block;padding:2px 3px">Ali Yahya</span></a>
 

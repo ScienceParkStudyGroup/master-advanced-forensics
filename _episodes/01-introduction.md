@@ -52,6 +52,7 @@ Taken from [Wikipedia](https://en.wikipedia.org/wiki/Adipose_tissue#Subcutaneous
 {: .callout}
 
 <br>
+
 # Dataset description
 
 ## Data provenance: the GTEx database
