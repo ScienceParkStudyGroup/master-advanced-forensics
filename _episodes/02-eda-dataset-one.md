@@ -1,6 +1,6 @@
 ---
 title: "Exploratory Data Analysis of dataset #1"
-teaching: 5
+teaching: 15
 exercises: 30
 questions:
 - "What are the main explorary data analysis step to perform?"
@@ -10,7 +10,9 @@ objectives:
 - "Reckon the value of EDA to get a better understanding of a dataset."
 - "Identify potential issues in this dataset."
 keypoints:
-- "See how EDA can help further downstream data analysis."
+- "Computing several descriptive metrics and distribution plots is important to visualise value distributions and potential outliers."
+- "Scaling is necessary to visualise values that show value differences of several order of magnitude."
+- "A pairwise plot matrix can help to pinpoint samples with similar gene expression profiles."
 ---
 
 
@@ -23,6 +25,8 @@ keypoints:
   - [Simple statistical metrics](#simple-statistical-metrics)
   - [Simple graphical descriptions](#simple-graphical-descriptions)
 - [Describing relationships between the different variables](#describing-relationships-between-the-different-variables)
+  - [Similar tissues \(artery\)](#similar-tissues-artery)
+  - [Dissimilar tissues \(lung, prostate and pancreas\)](#dissimilar-tissues-lung-prostate-and-pancreas)
 - [References](#references)
 
 <!-- /MarkdownTOC -->
@@ -245,9 +249,43 @@ df_tidy %>%
 ~~~
 {: .language-r} 
 
-# Describing relationships between the different variables
-    Analyzing relationships between variables
 
+
+# Describing relationships between the different variables
+
+A great way to visualise similar patterns from high-dimensional data is to create so-called _pairwise plot matrix_ to compare all tissues to each other in a comprehensive way. 
+Since we have 53 tissues, we could plot a 53 x 53 matrix but this requires some computational time. Instead, we are going to visualise similar and dissimilar tissues 3 tissues at a time (3 x 3 pairwise plot matrix).  
+
+## Similar tissues (artery)
+
+Similar tissues exhibit comparable gene expression patterns as it can be seen from the figure below. Here we will use the `ggpairs` function from the [`GGally` ggplot extension](https://www.rdocumentation.org/packages/GGally/versions/1.5.0). In order to use `ggpairs`, we will have to make the dataframe "wide" again using `pivot_wider()` for the `ggpairs` function to work.  
+
+Also, we will filter tissues based on a regular expression (`Artery*`) so that only tissue names with "artery" in their name are kept. 
+~~~
+df_tidy %>%
+  dplyr::filter(expression != 0) %>% 
+  filter(grepl(pattern = "Artery*", x = tissue)) %>% 
+  pivot_wider(id_cols = c(gene_id, Description), names_from = tissue, values_from = expression) %>% 
+  dplyr::select(- gene_id, - Description) %>%  # as ggpairs only accept numerical values
+  ggpairs(title = "Scatterplot matrix of artery tissues", upper = "blank") +
+  theme(axis.text.x = element_text(angle = 40, hjust = 1, vjust = 1))
+~~~
+{: .language-r}
+
+<img src="../img/01-artery.png" alt="pairwise plot matrix of similar tissues" width="50%">
+
+> ## Exercise
+> Try to plot other tissue types based on a regular expression. You can try "Esophagus\*" or "Brain\*" for instance. 
+{: .challenge} 
+
+
+## Dissimilar tissues (lung, prostate and pancreas)
+
+On the contrary, some tissues will exhibit contrasted gene expression profiles. Let's try with tissues that intuitively should be different i.e. the lungs, prostate and pancreas. 
+
+
+
+<img src="../img/01-contrasted-tissues.png" alt="pairwise plot matrix of contrasted tissues" width="50%">
 
 # References 
 
