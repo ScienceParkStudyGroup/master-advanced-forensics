@@ -98,7 +98,7 @@ Ahn, J., Wu, H. & Lee, K. Integrative Analysis Revealing Human Adipose-Specific 
 ## Teaching materials
 This lesson has been formatted according to the [Carpentries Foundation](https://carpentries.org/) lesson template and following their recommendations on how to teach researchers good practices in programming and data analysis.   
 
-This material builds from a lot of fantastic materials developed by others in the open data science community. Most of the content derives from the [Harvard Chan Bioinformatics Core](https://github.com/hbctraining) which are greatly acknowledge for the quality of their teaching materials.
+This material builds from a lot of fantastic materials developed by others in the open data science community. In particular, this lesson relies heavily on the material assembled by Hugo Tavares and Georg Zeller [Data Carpentry style lesson](https://tavareshugo.github.io/data-carpentry-rnaseq/).
 
 ## Image credits
 * Adipose tissue: Blausen.com staff (2014). "Medical gallery of Blausen Medical 2014". WikiJournal of Medicine 1 (2). [DOI:10.15347/wjm/2014.010](DOI:10.15347/wjm/2014.010). ISSN 2002-4436.

@@ -19,19 +19,19 @@ keypoints:
 # Table of Contents
 <!-- MarkdownTOC autolink="true" levels="1,2" -->
 
-- [What is Exploratory Data Analysis?](#what-is-exploratory-data-analysis)
-- [Data import sanity checks](#data-import-sanity-checks)
-- [Data exploration](#data-exploration)
-  - [Simple statistical metrics](#simple-statistical-metrics)
-  - [Simple graphical descriptions](#simple-graphical-descriptions)
-- [Describing relationships between the different variables](#describing-relationships-between-the-different-variables)
-  - [Similar tissues \(artery\)](#similar-tissues-artery)
-  - [Dissimilar tissues \(lung, prostate and pancreas\)](#dissimilar-tissues-lung-prostate-and-pancreas)
+- [1. What is Exploratory Data Analysis?](#1-what-is-exploratory-data-analysis)
+- [2. Data import sanity checks](#2-data-import-sanity-checks)
+- [3. Data exploration](#3-data-exploration)
+  - [3.1 Simple statistical metrics](#31-simple-statistical-metrics)
+  - [3.2 Simple graphical descriptions](#32-simple-graphical-descriptions)
+- [4. Describing relationships between the different variables](#4-describing-relationships-between-the-different-variables)
+  - [4.1 Similar tissues \(artery\)](#41-similar-tissues-artery)
+  - [4.2 Dissimilar tissues \(lung, prostate and pancreas\)](#42-dissimilar-tissues-lung-prostate-and-pancreas)
 - [References](#references)
 
 <!-- /MarkdownTOC -->
 
-# What is Exploratory Data Analysis?
+# 1. What is Exploratory Data Analysis?
 EDA (short for Exploratory Data Analysis) can have different purposes:
 * Handle Missing values.
 * Removing duplicates.
@@ -43,7 +43,7 @@ EDA (short for Exploratory Data Analysis) can have different purposes:
 
 Here, we are not going to do all of this. Instead, we will perform some data import checks, plotting some statistics and get an idea of how each tissue relates to each other. 
 
-# Data import sanity checks
+# 2. Data import sanity checks
 
 ~~~
 df_expr <- read.delim(file = "data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.tsv", 
@@ -104,9 +104,9 @@ head(n = 5)
 
 For big matrix, do `df_expr[1:5,1:5]` to show the first five lines and five columns for instance. 
 
-# Data exploration 
+# 3. Data exploration 
 
-## Simple statistical metrics
+## 3.1 Simple statistical metrics
 
 EDA helps to get a better understanding of the studied dataset and preparing its downstream analysis (e.g. fitting a regression model). 
 We are first going to compute a few descriptive metrics followed by some plotting. 
@@ -155,7 +155,7 @@ We are first going to compute a few descriptive metrics followed by some plottin
 > {: .solution}
 {: .challenge}
 
-## Simple graphical descriptions
+## 3.2 Simple graphical descriptions
 
 ### One tissue
 
@@ -251,12 +251,12 @@ df_tidy %>%
 
 
 
-# Describing relationships between the different variables
+# 4. Describing relationships between the different variables
 
 A great way to visualise similar patterns from high-dimensional data is to create so-called _pairwise plot matrix_ to compare all tissues to each other in a comprehensive way. 
 Since we have 53 tissues, we could plot a 53 x 53 matrix but this requires some computational time. Instead, we are going to visualise similar and dissimilar tissues 3 tissues at a time (3 x 3 pairwise plot matrix).  
 
-## Similar tissues (artery)
+## 4.1 Similar tissues (artery)
 
 Similar tissues exhibit comparable gene expression patterns as it can be seen from the figure below. Here we will use the `ggpairs` function from the [`GGally` ggplot extension](https://www.rdocumentation.org/packages/GGally/versions/1.5.0). In order to use `ggpairs`, we will have to make the dataframe "wide" again using `pivot_wider()` for the `ggpairs` function to work.  
 
@@ -279,10 +279,9 @@ df_tidy %>%
 {: .challenge} 
 
 
-## Dissimilar tissues (lung, prostate and pancreas)
+## 4.2 Dissimilar tissues (lung, prostate and pancreas)
 
 On the contrary, some tissues will exhibit contrasted gene expression profiles. Let's try with tissues that intuitively should be different i.e. the lungs, prostate and pancreas. 
-
 
 
 <img src="../img/01-contrasted-tissues.png" alt="pairwise plot matrix of contrasted tissues" width="50%">
