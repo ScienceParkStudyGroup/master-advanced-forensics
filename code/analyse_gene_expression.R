@@ -1,6 +1,7 @@
 suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("pheatmap"))
 suppressPackageStartupMessages(library("GGally"))
+suppressPackageStartupMessages(library("ggrepel"))
 source("code/pca_function.R") # custom function to perform Principal Component Analysis
 
 
@@ -91,27 +92,75 @@ df_tidy %>%
   dplyr::select(- gene_id, - Description) %>%  # as ggpairs only accept numerical values
   ggpairs(title = "Pairwise plot matrix of contrasted tissues", upper = "blank")
 
+ggsave(filename = "img/01-contrasted-tissues.png")
+
 #####
 # PCA
 #####
 
-mat_expr <- df_expr %>% 
-  column_to_rownames("probe")
+# TO DO ! Change genes to columns and tissues to rows ##
+# PCA: scores are related to samples/tissues while loadings will be related to variables (genes)
+# We need to transpose our dataset so that rows/columns are inverted
+# df_expr_transposed <- df_expr %>% 
+#   column_to_rownames("gene_id") %>% 
+#   dplyr::select(- Description) %>% 
+#   t(.) %>% 
+#   tibble()
 
-pca <- mypca(mat_expr, center = TRUE, scale = TRUE)
 
-pc1_pc2_df <- 
-  
-  
-  # add a convenient column number for the bar plot to display
-  dfev <- data.frame(PC = c(1,2,3,4), exp_var  = pca$explained_var)
+### PCA object
+pca <- df_expr %>% 
+  column_to_rownames("gene_id") %>% 
+  dplyr::select(- Description) %>% 
+  with(., mypca(x = ., center = TRUE, scale = TRUE))
 
-# make the plot
-scree_plot <- ggplot(dfev, aes(x = PC, y = exp_var)) +
+# Create a dataframe with all PC components (n = number of tissues)
+exp_var_df <- data.frame(PC = seq(1:53), exp_var = pca$explained_var)
+
+# make the complete screeplot
+ggplot(exp_var_df, aes(x = PC, y = exp_var)) +
   ylab('explained variance (%)') + 
-  ggtitle('explained variance per component') + 
-  geom_bar(stat = "identity")
+  ggtitle('explained variance per component (all principal components') + 
+  geom_bar(stat = "identity") +
+  labs(x = "Principal Component")
 
-# display it
-scree_plot
+ggsave(filename = "img/02-pca-all-components.png")
+
+# only first 5 components
+ggplot(exp_var_df[1:5,], aes(x = PC, y = exp_var)) +
+  ylab('explained variance (%)') + 
+  ggtitle('explained variance per component (only first 5 principal components)') + 
+  geom_bar(stat = "identity") +
+  labs(x = "Principal Component")
+
+ggsave(filename = "img/02-pca-5-first-components.png")
+
+### Scores
+scores <- pca$scores
+
+# plot the scores of the first 2 components
+explained_var = pca$explained_var$exp_var
+
+ggplot(scores) + 
+  geom_point(aes(x = PC1, y = PC2)) + 
+  xlab(paste0('PC1(',explained_var[1],'%)')) + 
+  ylab(paste0('PC2(',explained_var[2],'%)')) + 
+  ggtitle('PCA score plot') 
+
+ggsave(filename = "img/02-dataset-1-score-plot.png")
+
+### Loadings
+loadings <- pca$loadings %>%
+  rownames_to_column("tissue") 
+
+ggplot(data = loadings, aes(x = PC1, y = PC2, colour = tissue, label = tissue)) +  
+  geom_point() +  
+  guides(colour=FALSE) +
+  ggrepel::geom_text_repel()
   
+ggsave(filename = "img/02-dataset-1-loading-plot.png")
+
+
+
+
+

@@ -38,14 +38,45 @@ fits <- df_cpg_tidy_with_age %>%
   mutate(res = map(fit, glance)) %>% 
   unnest(res)
 
-#nested_df$aov_res[nested_df$CpG_id == "cg00000292"]
+fits_with_fdr <- fits %>% 
+  mutate(fdr = p.adjust(p.value, method = "fdr"))
+
+cpg_differentials <- filter(fits_with_fdr, fdr < 0.05) %>% 
+  dplyr::pull(CpG_id)
+
+length(cpg_differentials)
+
+df_cpg_tidy_with_age_filtered <- filter(df_cpg_tidy_with_age, 
+                                        CpG_id %in% cpg_differentials) 
+
 
 ### Heatmap using only diff sites
-df_for_heatmap <- pivot_wider(df_cpg_tidy, 
+df_for_heatmap <- pivot_wider(df_cpg_tidy_with_age_filtered, 
                               id_cols = CpG_id, 
                               names_from = "sample", 
                               values_from = "beta_coef") %>% 
   column_to_rownames("CpG_id")
 
+## Version 1: no sample annotation
+my_heatmap <- pheatmap(df_for_heatmap, 
+                       show_colnames = TRUE, 
+                       show_rownames = FALSE, 
+                       cluster_rows = TRUE, 
+                       cluster_cols = TRUE, 
+                       fontsize_col = 4)
 
-# multiple linear regression
+save_pheatmap_png(my_heatmap, "img/06-heatmap-1.png")
+
+## Version 2: with sample age annotation
+# adding sample age (color scale)
+sample_annot <- sample_age %>% column_to_rownames("sample") %>% select(age)
+
+my_heatmap2 <- pheatmap(df_for_heatmap, 
+                       annotation_col = sample_annot,
+                       show_colnames = TRUE, 
+                       show_rownames = FALSE, 
+                       cluster_rows = TRUE, 
+                       cluster_cols = TRUE, 
+                       fontsize_col = 4)
+
+save_pheatmap_png(my_heatmap2, "img/06-heatmap-2.png")
