@@ -4,7 +4,6 @@ This repository generates the lesson materials for the Master in Advanced Forens
 
 <!-- MarkdownTOC autolink="true" -->
 
-- [Contents](#contents)
 - [Preview changes to the lesson locally](#preview-changes-to-the-lesson-locally)
 - [Writing math symbols and formulas](#writing-math-symbols-and-formulas)
 - [Credits](#credits)
@@ -14,15 +13,6 @@ This repository generates the lesson materials for the Master in Advanced Forens
 	- [Inspiration](#inspiration)
 
 <!-- /MarkdownTOC -->
-
-
-# Contents
-1. Episode 01: introduction to dataset #1 (gene expression in human tissues)
-2. Episode 02: EDA (distribution of values using boxplots, correlations)
-3. Episode 03: PCA 
-4. Episode 04:
-5. Episode 05: introduction to dataset #2 (epigenetic marks and its relation to age)
-6. Episode 06: finding 
 
 # Preview changes to the lesson locally
 The lesson website is built through Github and Jekyll. 

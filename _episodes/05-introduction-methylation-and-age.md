@@ -1,5 +1,5 @@
 ---
-title: "Introductio to dataset #2 (methylation and age)"
+title: "Introduction to dataset #2 (methylation and age)"
 teaching: 30	
 exercises: 30 
 questions:
@@ -82,7 +82,8 @@ Beta values indicate the extent of DNA methylation at a given site as measured b
 > ## Checklist
 > 1. Download the CpG methylation and age datasets: [https://doi.org/10.5281/zenodo.4054842](https://doi.org/10.5281/zenodo.4054842).
 > 2. Read the publication of [Bocklandt et al. 2011](https://doi.org/10.1371/journal.pone.0014821) to understand the biological provenance of this dataset
-> 2. Open RStudio and create a new script called `age.R` for instance. 
+> 3. Open RStudio and create a new script called `age.R` for instance. 
+> 4. Load the `tidyverse` and `broom` packages with `library()``. 
 {: .checklist}
 
 # References

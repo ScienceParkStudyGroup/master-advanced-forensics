@@ -18,12 +18,9 @@ Before you begin, be sure you are all set up (see below). For complete informati
 
 
 ## Main learning objectives
-- Identify good practices when designing a RNA-Seq experiment.
-- Memorize the steps of a complete RNA-Seq experiment: from sequencing to analysis.
-- Perform a QC of your experiment through Principal Component Analysis (PCA) and sample clustering. 
-- Execute a differential gene expression analysis using R and the `DESeq2` package.  
-- Be able to create key plots: volcano plot, heatmap and clustering of differentially expressed genes.  
-- Provide a biological interpretation to differentially expressed genes through ORA/GSEA analyses and data integration.
+- XX
+- XX
+- XX
 
 > ## Before you start
 >
