@@ -5,14 +5,13 @@ title:
 
 # Setup
 
-<!-- MarkdownTOC autolink="True" levels="1,2" -->
+<!-- MarkdownTOC autolink="True" levels="1,2,3" -->
 
 - [Softwares \(R, RStudio and required R packages\)](#softwares-r-rstudio-and-required-r-packages)
 	- [Option 1 \(preferred\): using a Docker image](#option-1-preferred-using-a-docker-image)
 	- [Option 2: manual installation](#option-2-manual-installation)
-- [Datasets](#datasets)
-	- [Dataset #1 \(tissue gene expression\)](#dataset-1-tissue-gene-expression)
-	- [Dataset #2 \(age and DNA methylation\)](#dataset-2-age-and-dna-methylation)
+- [Dataset #1 \(tissue gene expression\)](#dataset-1-tissue-gene-expression)
+- [Dataset #2 \(DNA methylation and age\)](#dataset-2-dna-methylation-and-age)
 	- [CpG site methylation values](#cpg-site-methylation-values)
 	- [Sample to age correspondence](#sample-to-age-correspondence)
 	- [CpG site to gene and related annotation](#cpg-site-to-gene-and-related-annotation)
@@ -101,7 +100,9 @@ This is the second way to install softwares and packages. It _should_ work but t
 > 3. Get comfortable: if you're not in a physical workshop, be set up with two screens if possible. You will be following along in RStudio on your own computer while also following this tutorial on your own.
 {: .prereq}
 
-# Datasets
+# Dataset #1 (tissue gene expression)
+
+# Dataset #2 (DNA methylation and age)
 
 This dataset comes from the paper of [Bocklandt et al. 2011](https://doi.org/10.1371/journal.pone.0014821) on epigenetic prediction of human age.
 
@@ -116,12 +117,6 @@ This dataset comes from the paper of [Bocklandt et al. 2011](https://doi.org/10.
 > 3. That's it!
 {: .prereq}
 
-
-## Dataset #1 (tissue gene expression)
-
-
-
-## Dataset #2 (age and DNA methylation)
 
 ## CpG site methylation values
 
