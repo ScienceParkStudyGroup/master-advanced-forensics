@@ -408,10 +408,19 @@ save_pheatmap_png(my_heatmap, "heatmap.png")
 ## 3.4 Saving the filtered tidy CpG dataset for the next episodes
 
 ~~~
-write.table(x = df_cpg_tidy_with_age_filtered, 
-            file = "data/differential_cpgs_with_sample_age.tsv",
+# filter out unnecessary columns
+# comply with wide format (same as original one but with only 228 CpG sites)
+final_df <- 
+  df_cpg_tidy_with_age_filtered %>% 
+  dplyr::select(CpG_id, sample, beta_coef) %>% 
+  pivot_wider(id_cols = sample, names_from = CpG_id, values_from = beta_coef) 
+
+
+# make it wide to comply with the original data format
+write.table(x = final_df, 
+            file = "data/differential_cpgs.tsv",
             quote = FALSE, 
-            sep = "\t") 
+            sep = "\t")
 ~~~
 {: .language-r}
 # References
