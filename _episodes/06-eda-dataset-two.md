@@ -27,6 +27,7 @@ keypoints:
   - [3.1 First version of the heatmap](#31-first-version-of-the-heatmap)
   - [3.2 Slight upgrade](#32-slight-upgrade)
   - [3.3 Saving image on your hard drive](#33-saving-image-on-your-hard-drive)
+  - [3.4 Saving the filtered tidy CpG dataset for the next episodes](#34-saving-the-filtered-tidy-cpg-dataset-for-the-next-episodes)
 - [References](#references)
 
 <!-- /MarkdownTOC -->
@@ -404,6 +405,15 @@ save_pheatmap_png(my_heatmap, "heatmap.png")
 ~~~
 {: .language-r}
 
+## 3.4 Saving the filtered tidy CpG dataset for the next episodes
+
+~~~
+write.table(x = df_cpg_tidy_with_age_filtered, 
+            file = "data/differential_cpgs_with_sample_age.tsv",
+            quote = FALSE, 
+            sep = "\t") 
+~~~
+{: .language-r}
 # References
 - The [`broom()` package documentation](https://www.rdocumentation.org/packages/broom/versions/0.7.0)
 - A vignette to demonstrate the use of `dplyr`, `broom` and `map` altogether to perform nested computations: [Link](https://cran.r-project.org/web/packages/broom/vignettes/broom_and_dplyr.html)
