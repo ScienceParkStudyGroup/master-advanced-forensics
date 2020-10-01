@@ -1,6 +1,7 @@
 suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("pheatmap"))
 suppressPackageStartupMessages(library("broom"))
+source("code/save_pheatmap_function.R")
 
 
 
@@ -80,3 +81,11 @@ my_heatmap2 <- pheatmap(df_for_heatmap,
                        fontsize_col = 4)
 
 save_pheatmap_png(my_heatmap2, "img/06-heatmap-2.png")
+
+####
+### Save table with only differential CpG sites
+##
+write.table(x = df_cpg_tidy_with_age_filtered, 
+            file = "data/differential_cpgs_with_sample_age.tsv",
+            quote = FALSE, 
+            sep = "\t")

@@ -29,14 +29,23 @@ df_cpg_tidy = df_cpg %>%
 
 
 
-sample_age <- read.delim("data/cpg_methylation_sample_age.tsv", stringsAsFactors = FALSE)
-df_cpg_tidy_with_age =  dplyr::left_join(df_cpg_tidy, 
-                                         sample_age, 
-                                         by  = "sample") 
 
 # remove NAs and Inf values
-df_for_rf <- na.omit(df_cpg_tidy_with_age)
-df_for_rf <- df_for_rf[which(is.finite(df_for_rf$beta_coef)),]
+df <- df_cpg_tidy_with_age[which(is.finite(df_cpg_tidy_with_age$beta_coef)),] %>% 
+  na.omit(.) %>% 
+  pivot_wider(id_cols = sample, names_from = CpG_id, values_from = beta_coef)
 
-rf_model <- randomForest(x = na.omit(df_for_rf), 
-                         formula = age ~ .)
+# subset 1000 columns to create a reasonable dataset
+set.seed(123)
+cols2sample = sample(x = 1:ncol(df), size = 1000)
+df_subset <- column_to_rownames(.data = df, "sample") %>% select(all_of(cols2sample))
+
+# add age
+sample_age <- read.delim("data/cpg_methylation_sample_age.tsv", stringsAsFactors = FALSE) %>% 
+  dplyr::select(sample, age)
+df_for_rf <- rownames_to_column(df_subset, var = "sample") %>% 
+  left_join(x = ., y = sample_age, by = "sample") %>% 
+  column_to_rownames("sample") %>% 
+  na.omit(.)
+
+randomForest(age ~ ., data = df_for_rf)
