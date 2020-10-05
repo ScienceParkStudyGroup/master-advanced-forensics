@@ -17,14 +17,16 @@ keypoints:
 <!-- MarkdownTOC autolink="True" levels="1,2,3" -->
 
 - [1. Principal Component Analysis](#1-principal-component-analysis)
-   - [1.1 Introduction to PCA](#11-introduction-to-pca)
-   - [1.2 The Iris dataset](#12-the-iris-dataset)
+  - [1.1 Introduction to PCA](#11-introduction-to-pca)
+  - [1.2 The Iris dataset](#12-the-iris-dataset)
 - [2. PCA analysis on dataset #1](#2-pca-analysis-on-dataset-1)
-   - [2.1 The PCA R object](#21-the-pca-r-object)
-   - [2.2 Scree plot](#22-scree-plot)
-   - [2.3 PCA score plot](#23-pca-score-plot)
-   - [2.4 PCA loading plot](#24-pca-loading-plot)
-- [References](#references)
+  - [2.1 Data filtering and transformation](#21-data-filtering-and-transformation)
+  - [2.2 Performing the PCA analysis](#22-performing-the-pca-analysis)
+  - [2.3 Number of components to extract: the scree plot](#23-number-of-components-to-extract-the-scree-plot)
+  - [2.4 PCA score plot](#24-pca-score-plot)
+  - [2.4 PCA loading plot](#24-pca-loading-plot)
+- [3. Time to practice](#3-time-to-practice)
+- [4. References](#4-references)
 
 <!-- /MarkdownTOC -->
 
@@ -114,8 +116,12 @@ For convenience we use a very rudimentary (own) implementation implementation of
 # define a custom R function called "mypca()""
 mypca <- function(x, center = TRUE, scale = TRUE){  
   
+  # remove columns containing only 0 values
+  # not informative + cause svd() error
+  x_without_zero_columns <- x[,colSums(x != 0) != 0] 
+  
   # perform SVD
-  SVD <- svd(scale(x,center = center, scale = scale))
+  SVD <- svd(scale(x_without_zero_columns, center = center, scale = scale))
   
   # create scores data frame
   scores <- as.data.frame(SVD$u %*% diag(SVD$d))
@@ -125,7 +131,7 @@ mypca <- function(x, center = TRUE, scale = TRUE){
   # create loadings data frams
   loadings <- data.frame(SVD$v)
   colnames(loadings) <- paste0("PC", c(1:dim(loadings)[2]))
-  rownames(loadings) <- colnames(x)
+  row.names(loadings) <- colnames(x_without_zero_columns)
   
   # create data frame for explained variances
   explained_var <- as.data.frame(round((SVD$d^2) / sum(SVD$d^2)*100, digits = 1))
@@ -186,7 +192,9 @@ p
 
 <img src="../img/pca_iris_new.png" width="600px" alt="pca_iris_new">
 
-From the score plot it is clear that the Setosa flowers are clearly different from the Versicolor/Virginica flowers. Versicolor and Virginica cannot be separated on PC1 and/or PC2. Looking at the PC1 vs PC3 however, the two groups can be separated better. It is very important to understand that even if a principal component explains a low amount of variance it still can contain interesting (biological) information. 
+From the score plot it is clear that the Setosa flowers are different from the Versicolor/Virginica flowers. Versicolor and Virginica cannot be separated on PC1 and/or PC2.   
+
+Looking at the PC1 vs PC3 however, the two groups can be separated better. It is very important to understand that even if a principal component explains a low amount of variance it still can contain interesting (biological) information. 
 
 <img src="../img/pca_iris_1_3.png" width="600px" alt="pca_iris_1_3">
 
@@ -219,30 +227,98 @@ There are many more things to learn on PCA (e.g. scaling, filtering) but that is
 
 # 2. PCA analysis on dataset #1
 
-## 2.1 The PCA R object
+For the rest of the lesson, we are going to filter our gene expression dataset to retain only 10 tissues to simplify the analysis. This will not change your main goal (e.g. find subcutaneous fat adipose-related genes). 
 
-Let's create an object called `pca` that contains all the PCA information required later for plots. The `mypca()` function is a custom function that can be found [here](../extras/pca_function.md). 
+## 2.1 Data filtering and transformation
 
+Let's first import the gene expression dataset and filter it. 
 ~~~
-pca <- df_expr %>% 
-  column_to_rownames("gene_id") %>% 
-  dplyr::select(- Description) %>% 
-  with(., mypca(x = ., center = TRUE, scale = TRUE))
+df_expr <- read.delim(file = "data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.tsv", 
+                 header = TRUE, 
+                 stringsAsFactors = FALSE,
+                 check.names = FALSE)
+
+df_expr_ten_tissues = 
+  dplyr::select(df_expr, - Description) %>% 
+  dplyr::select(1:11) # 'gene_id' column and 10 other tissues
+
+df_expr_ten_tissues[1:5,1:5]
 ~~~
 {: .language-r}
 
-## 2.2 Scree plot
-A scree plot is useful to determine the number of principal components to retain. It displays the explained variance (in %) as a factor of the number of PCs in the form of a downward curve. if an "elbow" can be seen on the curve with a flat line afterwards, you can retain the number of PCs that is indicated by the "elbow".
+Genes are in rows while tissues are in columns.   
+~~~
+gene_id           `Adipose - Subcutaneous` `Adipose - Visceral (Omentum… `Adrenal Gland` `Artery - Aorta`
+  <chr>                                <dbl>                         <dbl>           <dbl>            <dbl>
+1 ENSG00000223972.4                   0.0569                        0.0505          0.0746           0.0398
+2 ENSG00000227232.4                  11.8                           9.75            8.02            12.5   
+3 ENSG00000243485.2                   0.0615                        0.0596          0.0818           0.0430
+4 ENSG00000237613.2                   0.0386                        0.0324          0.0405           0.0282
+5 ENSG00000268020.2                   0.0357                        0               0.0348           0     
+~~~
+{: .output}
+
+It is a common convention that genes (variables) are in columns and tissues (samples) are in rows. Therefore, we will need to transpose the data first before performing the PCA analysis.
 
 ~~~
-# Create a dataframe with all PC components (n = number of tissues)
-exp_var_df <- data.frame(PC = seq(1:53), exp_var = pca$explained_var)
+# It's usually a convention to have variables in columns and samples in rows.
+# Here: Genes = variables 
+# Here: Tissues = samples
+# PCA: scores will be computed for samples/tissues and will give us their coordinates
+# while loadings will be related to variables (genes)
+# We need to transpose our dataset so that rows/columns are inverted
+df_expr_transposed <- df_expr_ten_tissues %>% 
+   column_to_rownames("gene_id") %>% 
+  t()
 
+df_expr_transposed[1:5,1:4]
+~~~ 
+{: .language-r}
+
+Genes are now in columns and tissues in rows.
+~~~
+                             ENSG00000223972.4 ENSG00000227232.4 ENSG00000243485.2 ENSG00000237613.2
+Adipose - Subcutaneous                0.056945            11.850           0.06146           0.03860
+Adipose - Visceral (Omentum)          0.050540             9.753           0.05959           0.03245
+Adrenal Gland                         0.074600             8.023           0.08179           0.04050
+Artery - Aorta                        0.039760            12.510           0.04297           0.02815
+Artery - Coronary                     0.043860            12.300           0.05848           0.03678
+~~~
+
+We are now ready to actually perform the PCA itself.
+
+## 2.2 Performing the PCA analysis
+
+Let's create an object called `pca` that contains all the PCA information required later for plots. The `mypca()` function is the custom function we used before (see above).
+
+~~~
+pca <- mypca(x = df_expr_transposed, 
+            center = TRUE, 
+            scale = TRUE)
+~~~
+{: .language-r}
+
+Please not that centering and scaling are set using the `center = TRUE` and `scale = TRUE` arguments.   
+This ensures that all genes will have a mean approximately equal to 0 and a standard deviation equal to 1. 
+
+## 2.3 Number of components to extract: the scree plot
+
+A scree plot is useful to determine the number of principal components to retain in further downstream analysis. That is "how many components are sufficient to catch most of the variation within the data". 
+
+
+A scree plot displays the explained variance (in %) as a factor of the number of PCs in the form of a downward curve. if an "elbow" can be seen on the curve with a flat line afterwards, you can retain the number of PCs that is indicated by the "elbow".
+
+The maximum number of PC that can be built is equal to the number of variables (genes) in the dataset. The first PC should account for the largest possible variance in the data set, the second for the second largest, etc.
+
+~~~
 # make the complete screeplot
-ggplot(exp_var_df, aes(x = PC, y = exp_var)) +
+ggplot(exp_var_df, aes(x = PC, y = exp_var, label = PC)) +
   ylab('explained variance (%)') + 
   ggtitle('explained variance per component (all principal components') + 
-  geom_bar(stat = "identity")
+  geom_bar(stat = "identity") +
+  labs(x = "Principal Component number") + 
+  scale_y_continuous(limits = c(0, 50)) +
+  scale_x_continuous(breaks = seq(from = 1, to = 10, by = 1))
 ~~~
 {: .language-r}
 
@@ -251,27 +327,63 @@ ggplot(exp_var_df, aes(x = PC, y = exp_var)) +
 > ## Exercise
 > Based on the last plot, how many PCs do you think are necessary to catch most of the variation in the data?
 > > ## Solution
-> > One component seems to be enough to catch around 80\% of the total variance.
+> > One component would be enough to catch around 45% of the total variance. Yet PC2, PC3 and PC4 also explain some variation (around 10%) and could be worthwhile to keep.
 > {: .solution}
 {: .challenge }
 
-We can "zoom in" by taking only the first five principal components to see how the explained variance per component evolves along with additional principal components.  
+The plot above clearly shows that only one principal component manages to catch up around 45\% of the total variance. This is actually a sign that we should easily distinguish the different tissues using only one PC. Yet, you can also see that PC2, PC3 and PC4 also explain around 10\% of the total variance therefore suggesting that they may also comprise relevant biological information. 
 
-~~~
-ggplot(exp_var_df[1:5,], aes(x = PC, y = exp_var)) +
-  ylab('explained variance (%)') + 
-  ggtitle('explained variance per component (only first 5 principal components)') + 
-  geom_bar(stat = "identity") +
-  labs(x = "Principal Component")
-~~~
-{: .language-r}
+> ## Callout
+> There is another way to determine the number of PC to keep that is less human-biased. You choose the % of variance that you wish to explain using the 
+> minimal number of PCs. Then, you extract the number of PC automatically.
+{: .callout} 
 
-The plot below clearly shows that only one principal component manages to catch up as much as 80\% of the total variance. This is actually a sign that we should easily distinguish the different tissues using only one PC. 
+Let's practice this less biased method.
 
-<img src="../img/02-pca-5-first-components.png" alt="screeplot with the first 5 principal components" width="50%">
+> ## Exercise
+> Assuming that you want to explain 80% of the variance, how many PCs would you need?
+> 1. Knowing that the `cumsum()` function can be used to calculate a cumulative sum, add a column to the `exp_var_df` that contains the cumulative variance explained by PC1, PC2, etc.
+> 2. Make a plot using `ggplot()` that displays the cumulative variance explained by the different PCs. Add a horizontal line that shows the 80\% variance threshold. 
+> 3. Automatically extract the number of PCs sufficient to explain 80% of the total variance. 
+> 
+> > ## Solution
+> > 1) Using the `cumsum` function:  
+> > ~~~
+> > exp_var_df = mutate(exp_var_df, cum_var = cumsum(exp_var))
+> > ~~~
+> > {: .language-r}
+> > 
+> > 2) Here is a solution:    
+> > ~~~
+> > ggplot(exp_var_df, aes(x = PC, y = cum_var)) +
+> >   geom_point() + 
+> >   geom_line(group = 1) + 
+> >   labs(x = "Principal Component", y = "Cumulative Explained Variance (%)") +
+> >   scale_x_continuous(breaks = 1:10) +
+> >   geom_hline(yintercept = 80, color = "red")
+> > ~~~
+> > {: .language-r}
+> > 
+> > 3) You have to retrieve the PC for which the cumulative variance becomes higher than the 80% threshold. Here, you have to have 4 PCs to explain more than 80% of the variance.  
+> > ~~~
+> > # this gives you all the PCs for which the cumulative explained variance is above 80%
+> > exp_var_df[which(exp_var_df$cum_var > 80),]
+> > 
+> > # adding min() before this expression gives you the first row where it happens. 
+> > exp_var_df[min(which(exp_var_df$cum_var > 80)),]
+> > ~~~
+> > {: .language-r}
+> > 
+> {: .solution}
+{: .challenge }
 
-## 2.3 PCA score plot
-The score plot will indicate how 
+<img src="../img/02-pca-cumulative-variance.png" alt="cumulative variance explained" width="50%">
+
+4 principal components would be enough to explain more than 80% of the variance here. 
+
+## 2.4 PCA score plot
+
+The score plot will indicate where our tissues (samples) are in our new coordinate system based on the computed PCs. 
 
 Let's first create a dataframe containing the gene scores in the new dimensional space created by the computed PCs.  
 ~~~
@@ -280,48 +392,156 @@ scores[1:5,1:5]
 ~~~
 {: .language-r} 
 
-
 ~~~
-                          PC1         PC2          PC3         PC4          PC5
-ENSG00000223972.4 -0.30035641 -0.11242079 -0.006871925 0.009222968 -0.005103927
-ENSG00000227232.4 -0.05115296  0.01722664 -0.008243997 0.013950002 -0.015618584
-ENSG00000243485.2 -0.30089985 -0.11217751 -0.006927010 0.009235968 -0.004851915
-ENSG00000237613.2 -0.30135627 -0.11213555 -0.006915154 0.009235249 -0.004905633
-ENSG00000268020.2 -0.30168986 -0.11225956 -0.006938164 0.009248330 -0.004895056
+                                    PC1        PC2        PC3        PC4        PC5
+Adipose - Subcutaneous       -90.225250   5.057291 -69.535176   81.98662 -16.812756
+Adipose - Visceral (Omentum) -55.218949  12.039811 -91.344836   74.09467  11.613831
+Adrenal Gland                 -3.650495  98.064591 -85.036562 -125.37325  -3.532067
+Artery - Aorta               -91.912081 -82.419671  30.384563  -43.57703  17.923121
+Artery - Coronary            -79.536045 -48.810424   3.865236  -15.59008  10.612863
 ~~~
 {: .output}
 
-You see that each gene has coordinates on each PC ("axis") of the new dimensional space. That means that we can display these points as a 2D plot using two PCs at a time.  
-
-First, we need to 
+You see that each tissue has specific coordinates on each PC ("axis") of the new dimensional space. That means that we can display these points as a 2D plot using two PCs at a time.  
+ 
 Let's do this with PC1 and PC2. 
 
 ~~~
-scores <- pca$scores
+library("ggrepel")
 
-# extract explained variance per component for plot axis labels
+# extract explained variance to add to the axis labels
 explained_var = pca$explained_var$exp_var
 
-# plot the scores of the first 2 components
-ggplot(scores) + 
-  geom_point(aes(x = PC1, y = PC2)) + 
-  xlab(paste0('PC1(',explained_var[1],'%)')) + 
-  ylab(paste0('PC2(',explained_var[2],'%)')) + 
-  ggtitle('PCA score plot')
+# useful for labelling the dots in the plot 
+tissue_names = row.names(scores)
+
+ggplot(scores, aes(x = PC1, y = PC2, label = tissue_names)) + 
+  geom_point(aes(colour = factor(tissue_names))) + 
+  xlab(paste0('PC1 (',explained_var[1],'%)')) + 
+  ylab(paste0('PC2 (',explained_var[2],'%)')) + 
+  ggtitle('PCA score plot') + 
+  geom_text_repel() +
+  guides(colour = FALSE) # remove the color legend (not informative)
 ~~~
 {: .language-r}
 
-<img src="../img/02-dataset-1-score-plot.png" alt="Score plot from dataset #1" width="50%"> 
 
-This is not the most informative plot since genes seems to be mostly grouped together on the left of the plot. 
+
+<img src="../img/02-dataset-1-score-plot-with-names.png" alt="score plot for PC1 and PC2" width="50%">
+
+We do see some groupings among our tissues. In particular, it is quite clear that _brain_ tissues distinguish themselves based on PC1 while the _bladder_ and _adrenal gland_ are separated from the other tissues on PC2. 
+
+> ## Question
+> Can you create the score plot for PC2 and PC3?   
+> What are the tissues that you can separate on PC3?  
+> Hint: keep PC2 on the y axis so that you keep one common axis with the previous plot (PC1-PC2 plot).
+> 
+> > ## Solution
+> > ~~~
+> > ggplot(scores, aes(x = PC3, y = PC2, label = tissue_names)) + 
+> >  geom_point(aes(colour = factor(tissue_names))) + 
+> >   xlab(paste0('PC3 (',explained_var[3],'%)')) + 
+> >   ylab(paste0('PC2 (',explained_var[2],'%)')) + 
+> >   ggtitle('PCA score plot: PC2 and PC3') + 
+> >   geom_text_repel() +
+> >   guides(colour = FALSE)
+> > ~~~
+> > {: .language-r}  
+> > This PC2-PC3 score plot shows that the _bladder_ and _adrenal gland_ can now be separated on PC3.  
+> {: .solution}
+{: .challenge}
+
+<img src="../img/02-dataset-1-score-plot-with-names-pc2-pc3.png" alt="score plot for PC2 and PC3" width="50%">
 
 ## 2.4 PCA loading plot
 
-The loadings will tell us how the different tissues score in the new dimensional space. To plot them, we will need to do a bit of reshaping of our `pca$loadings` dataframe. 
+Since the principal components are built using weighted combinations of the initial variables (genes here), it is possible to retrieve these variable coefficients that are called "loadings".
+
+A high loading for one gene on a given PC indicates that this gene has a high contribution to the constructino of the given PC.
+
+Let's extract the 10 genes with the highest contribution to PC1, PC2 and PC3 for instance. 
+
 
 ~~~
-loadings <- pca$loadings %>% rownames_to_column("tissue") %>% pivot_longer(cols = - tissue)
+loadings <- pca$loadings %>%
+  rownames_to_column("gene") 
+
+loadings[1:5,1:5]
 ~~~
+{: .language-r}
+
+~~~
+          gene          PC1           PC2           PC3           PC4
+1 ENSG00000223972.4  0.006996176  0.0057920043 -0.0006521386 -1.058243e-03
+2 ENSG00000227232.4 -0.007557482 -0.0005034083  0.0048543880  1.814302e-03
+3 ENSG00000243485.2  0.007485112  0.0034005692 -0.0005971600 -8.105314e-05
+4 ENSG00000237613.2  0.007154616  0.0027982208  0.0030172087  1.277894e-03
+5 ENSG00000268020.2  0.006696861  0.0028828018 -0.0035767667  2.254548e-04
+~~~
+{: .output}
 
 
-# References
+In our case, it seems that adipose tissues can be separated from the others using a combinatino of PC1 and PC3. While PC1 separates the brain tissues from the other tissues, PC3 separates the adipose tissues together with the _adrenal gland_ tissue. 
+
+Let's extract the genes that have the higher loadings on PC1 and PC3.
+
+> ## Callout
+> Take a look at the two previous plots (PC1-PC2, PC2-PC3). You will see that adipose-related tissues have negative coordinates on the new PC axis. Therefore, we need to extract the _most negative_ loadings on PC1 and PC3. 
+{: .callout}
+
+Let's use a bit of `dplyr` & `tidyr` magic here. 
+~~~
+top10genes_PC1_PC3 <- 
+  loadings %>% 
+  pivot_longer(cols = - gene_id, names_to = "PC", values_to = "loadings") %>% 
+  dplyr::filter(PC == "PC1" | PC == "PC3") %>%                                           # PC1 or PC3 are selected
+  group_by(PC) %>% 
+  dplyr::arrange(loadings) %>%                                                           # sort by most negative value first (based on coord. in previous plots)
+  dplyr::slice(1:10) %>% 
+  left_join(x = ., y = df_expr[c("gene_id", "Description")], by = "gene_id")             # add back gene symbol
+~~~
+{: .language-r}  
+
+
+~~~
+   gene_id            PC    loadings Description  
+   <chr>              <chr>    <dbl> <chr>        
+ 1 ENSG00000104529.13 PC1   -0.00812 EEF1D        
+ 2 ENSG00000134109.6  PC1   -0.00810 EDEM1        
+ 3 ENSG00000037474.10 PC1   -0.00810 NSUN2        
+ 4 ENSG00000083845.4  PC1   -0.00810 RPS5         
+ 5 ENSG00000142541.12 PC1   -0.00810 RPL13A       
+ 6 ENSG00000164938.9  PC1   -0.00809 TP53INP1     
+ 7 ENSG00000183474.11 PC1   -0.00809 GTF2H2C      
+ 8 ENSG00000162736.11 PC1   -0.00809 NCSTN        
+ 9 ENSG00000203865.5  PC1   -0.00809 ATP1A1OS     
+10 ENSG00000113838.8  PC1   -0.00809 TBCCD1       
+11 ENSG00000253785.1  PC3   -0.0139  CTC-308K20.3 
+12 ENSG00000182890.3  PC3   -0.0136  GLUD2        
+13 ENSG00000271500.1  PC3   -0.0136  RP11-288K12.1
+14 ENSG00000254003.1  PC3   -0.0134  CTB-167B5.1  
+15 ENSG00000271367.1  PC3   -0.0134  RP3-483K16.4 
+16 ENSG00000227440.1  PC3   -0.0130  ATP5G1P4     
+17 ENSG00000232623.1  PC3   -0.0130  AP000266.7   
+18 ENSG00000230911.1  PC3   -0.0129  PPIHP1       
+19 ENSG00000235559.1  PC3   -0.0129  NOL5BP       
+20 ENSG00000231916.1  PC3   -0.0128  AC006033.22  
+~~~
+{: .output}
+
+# 3. Time to practice
+
+> ## Exercise 1
+> Perform the PCA analysis _without_ prior scaling of the data. Hint: set the `scale` argument of the `mypca()` function to `FALSE`.     
+> What are the consequences on the score and loading plots?
+{: .challenge}
+
+> ## Exercise 2
+> Re-import the original data file and select the first 15 tissues instead of the first 10.   
+> Create the score plots for PC1-PC2 and PC2-PC3.  
+> How many PCs do you need to catch 80% of the variance now?
+{: .challenge}   
+
+# 4. References
+- Hugo Tavares [PCA step-by-step guide](https://tavareshugo.github.io/data-carpentry-rnaseq/03_rnaseq_pca.html)
+- Bradley Boehmke [Principal Component Analysis book section](https://bradleyboehmke.github.io/HOML/pca.html#the-idea-2)

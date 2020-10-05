@@ -6,6 +6,7 @@ This repository generates the lesson materials for the Master in Advanced Forens
 
 - [Preview changes to the lesson locally](#preview-changes-to-the-lesson-locally)
 - [Writing math symbols and formulas](#writing-math-symbols-and-formulas)
+- [Creating X Docker machines](#creating-x-docker-machines)
 - [Credits](#credits)
 	- [Maintainer\(s\)](#maintainers)
 	- [Authors](#authors)
@@ -29,11 +30,14 @@ __Option 2:__ use a Docker container
 6. Open a web browser and type `http://0.0.0.0:4000/` in the navigation bar. You should see the lesson website. Your changes should be automatically reflected online.  
 
 
-
 # Writing math symbols and formulas
 Sometimes, you need to render mathematical formula etc. GitHub pages which is using Jekyll to render html pages makes use of [MathJax])https://www.mathjax.org/). 
 
 Visit the official website and consult [this thread](https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference) for quick ways to render math symbols.
+
+# Creating X Docker machines
+
+
 
 
 # Credits

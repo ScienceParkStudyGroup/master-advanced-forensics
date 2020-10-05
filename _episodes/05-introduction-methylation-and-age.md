@@ -57,7 +57,7 @@ In genomes, some regions contain a high amount of CG sites (one cytosine followe
 
 Approximately 60–70% of genes have a CpG island associated with their promoters, and promoters can be classified according to their CpG density. Levels of DNA methylation at a promoter-associated CpG island are generally negatively associated with gene expression, although some specific genes show the opposite effect. Interestingly, this negative correlation is not upheld when comparing expression and DNA methylation for a specific gene across individuals. Conversely, DNA methylation in the gene body is often positively associated with levels of gene expression. Although direct causal relationships between DNA methylation, gene expression and mechanisms of aging have not been established so far, it has been shown that systematic age-related changes in DNA methylation do occur. 
 
-Specific tools such as microarrays have been designed to measure the level of methylation of thousands of CpG islands simultaneously. For instance, the [Illumina Methylation Assay](https://en.wikipedia.org/wiki/Illumina_Methylation_Assay) can be used to measure simultaneously 27,578 CpG dinucleotides from the Human genome.
+Specific tools such as microarrays have been designed to measure the level of methylation of thousands of CpG islands simultaneously. For instance, the [Illumina Methylation Assay](https://en.wikipedia.org/wiki/Illumina_Methylation_Assay) can be used to measure simultaneously 	 CpG dinucleotides from the Human genome.
 In total, 14,495 genes can have their CG site methylation state assayed.   
 
 # Dataset description
@@ -83,7 +83,7 @@ Beta values indicate the extent of DNA methylation at a given site as measured b
 > 1. Download the CpG methylation and age datasets: [https://doi.org/10.5281/zenodo.4054842](https://doi.org/10.5281/zenodo.4054842).
 > 2. Read the publication of [Bocklandt et al. 2011](https://doi.org/10.1371/journal.pone.0014821) to understand the biological provenance of this dataset
 > 3. Open RStudio and create a new script called `age.R` for instance. 
-> 4. Load the `tidyverse` and `broom` packages with `library()``. 
+> 4. Load the `tidyverse` and `broom` packages with `library()`. 
 {: .checklist}
 
 # References

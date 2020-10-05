@@ -1,8 +1,10 @@
 # define a custom R function called "mypca()""
 mypca <- function(x, center = TRUE, scale = TRUE){  
   
+  x_without_zero_columns <- x[,colSums(x != 0) != 0] 
+  
   # perform SVD
-  SVD <- svd(scale(x,center = center, scale = scale))
+  SVD <- svd(scale(x_without_zero_columns, center = center, scale = scale))
   
   # create scores data frame
   scores <- as.data.frame(SVD$u %*% diag(SVD$d))
@@ -12,7 +14,7 @@ mypca <- function(x, center = TRUE, scale = TRUE){
   # create loadings data frams
   loadings <- data.frame(SVD$v)
   colnames(loadings) <- paste0("PC", c(1:dim(loadings)[2]))
-  rownames(loadings) <- colnames(x)
+  row.names(loadings) <- colnames(x_without_zero_columns)
   
   # create data frame for explained variances
   explained_var <- as.data.frame(round((SVD$d^2) / sum(SVD$d^2)*100, digits = 1))
