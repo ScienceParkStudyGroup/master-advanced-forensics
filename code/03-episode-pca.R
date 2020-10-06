@@ -103,11 +103,18 @@ ggplot(scores, aes(x = PC1, y = PC3, label = tissue_names)) +
 
 ### Loadings
 loadings <- pca$loadings %>%
-  rownames_to_column("gene") 
+  rownames_to_column("gene_id") 
   
-ggsave(filename = "img/02-dataset-1-loading-plot.png")
+top10genes_PC1_PC3 <- 
+  loadings %>% 
+  pivot_longer(cols = - gene_id, names_to = "PC", values_to = "loadings") %>% 
+  dplyr::filter(PC == "PC1" | PC == "PC3") %>% 
+  group_by(PC) %>% 
+  dplyr::arrange(loadings) %>% 
+  dplyr::slice(1:10) %>% 
+  left_join(x = ., y = df_expr[c("gene_id", "Description")], by = "gene_id")
 
-
+top10genes_PC1_PC3
 
 
 

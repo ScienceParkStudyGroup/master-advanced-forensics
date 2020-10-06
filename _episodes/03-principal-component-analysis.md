@@ -502,6 +502,7 @@ top10genes_PC1_PC3 <-
 ~~~
 {: .language-r}  
 
+Here are the 10 genes most related to PC1 and PC2 according to their loadings.   
 
 ~~~
    gene_id            PC    loadings Description  
@@ -528,6 +529,11 @@ top10genes_PC1_PC3 <-
 20 ENSG00000231916.1  PC3   -0.0128  AC006033.22  
 ~~~
 {: .output}
+
+> ## Question
+> Go to the [GTEx portal](https://www.gtexportal.org/home/) and search additional information about these genes.   
+>  What do you think about the genes that are most related to PC1 and PC3? Are these likely to be adipose-specific genes?
+{: .challenge}
 
 # 3. Time to practice
 
