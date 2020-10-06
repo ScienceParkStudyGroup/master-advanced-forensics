@@ -45,7 +45,21 @@ Here, we are not going to do all of this. Instead, we will perform some data imp
 
 # 2. Data import sanity checks
 
+First, create a `data/` folder in your working directory. For instance, if you are working on your Desktop, then your R working directory should be `~/Desktop/` at the top of your R console (bottom-left panel).
+
+You can also check this within R using the `getwd()` command. 
+
 ~~~
+getwd()
+~~~
+{: .language-r}
+
+
+~~~
+# download the file from Zenodo
+download.file(url = "https://zenodo.org/record/4068261/files/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.tsv?download=1", 
+              destfile = "data/test.tsv", method = "wget", quiet = TRUE)
+
 df_expr <- read.delim(file = "data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.tsv", 
                  header = TRUE, 
                  stringsAsFactors = FALSE,

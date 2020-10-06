@@ -77,23 +77,71 @@ df_expr_tidy <- df_expr %>%
   select(- Description) %>% 
   pivot_longer(- gene_id, names_to = "tissue", values_to = "tpm")
 
+# a lot of genes have very small TPM values
 df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
   with(., summary(median_tpm))
 
-df_expr_tidy %>% 
+# 3rd quartile (genes with median TPM > 75th percentile)
+# 14,049 genes instead of over 56,000
+genes_selected = 
+  df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
-  filter(median_tpm)
+  ungroup() %>% 
+  filter(median_tpm > 1.7) %>% 
+  dplyr::pull(gene_id)
 
-test <- df_expr_tidy %>% filter(gene_id == "ENSG00000223972.4")
+df_expr_tidy_filtered <- filter(df_expr_tidy, gene_id %in% genes_selected)
 
-fits <- df_expr_tidy %>% 
-  nest(.data = ., - gene_id) %>%                                                  # categorical variable used for ANOVA
-  mutate(fit = map(data, ~ aov(data = ., formula = .$tpm ~ .$tissue))) %>%        # One-factor ANOVA with age as the Y and beta value as X 
-  mutate(res = map(fit, glance)) %>%                                             # Use broom::glance to return a tibble from a aov/lm object  
-  unnest(res)
+## Step 1: extract gene TPM value in "Adipose - Subcutaneous"  
+adipose_gene_expression <- df_expr_tidy_filtered %>% 
+  filter(tissue == "Adipose - Subcutaneous") %>% 
+  select(gene_id, tpm) %>% 
+  rename(adipose_tpm = tpm)
+
+## Step 2: calculate median TPM value in all other tissues
+all_other_tissues_gene_expression <- 
+  df_expr_tidy_filtered %>% 
+  filter(tissue != "Adipose - Subcutaneous") %>% 
+  group_by(gene_id) %>% 
+  summarise(other_tissues_median_tpm = median(tpm))
+
+## Merge the two dataframes
+## Calculate a fold change
+adipose_vs_other_tissues <- inner_join(x = adipose_gene_expression, 
+                                       y = all_other_tissues_gene_expression, 
+                                       by = "gene_id") %>% 
+  mutate(fc = adipose_tpm / other_tissues_median_tpm) %>% 
+  mutate(log2_fc = log2(fc)) 
+
+# calculate Z-score 
+mean_of_log2fc <- with(data = adipose_vs_other_tissues, mean(log2_fc))
+sd_of_log2fc <- with(data = adipose_vs_other_tissues, sd(log2_fc))
+
+adipose_vs_other_tissues$zscore <- map_dbl(
+  adipose_vs_other_tissues$log2_fc, 
+  function(x) (x - mean_of_log2fc) / sd_of_log2fc
+  )
+
+# normal distribution of log2FC?
+ggplot(adipose_vs_other_tissues, aes(x = log2_fc)) +
+  geom_density()
+
+# test for normality
+ks.test(x = adipose_vs_other_tissues$log2_fc, y = "pnorm", mean = mean_of_log2fc, sd = sd_of_log2fc)
+
+# filter fc > 0 + calculate one-sided p-value
+adipose_specific_genes = 
+  adipose_vs_other_tissues %>%  
+  filter(log2_fc > 0) %>% # FC superior to 1
+  mutate(pval = 1 - pnorm(zscore)) %>% 
+  filter(pval < 0.01) %>% 
+  arrange(desc(log2_fc))
+
+adipose_specific_genes
+
 
 
 

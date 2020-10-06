@@ -102,6 +102,32 @@ This is the second way to install softwares and packages. It _should_ work but t
 
 # Dataset #1 (tissue gene expression)
 
+This dataset comes from the [Genotype-Tissue Expression (GTEx) database](https://www.gtexportal.org/home/) that gathers gene expression data from various human tissues. Specifically, the __GTEx Analysis v7__ version was used. 
+
+> ## Download the required datasets
+> [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4068260.svg)](https://doi.org/10.5281/zenodo.4068260)
+> 1. Go to the corresponding data record on [Zenodo](https://doi.org/10.5281/zenodo.4068260).
+> 2. You will see one single dataset that you need to download to your computer. 
+> 3. Download the dataset to your machine and place it into a folder called `data/`. For instance, if you work on your Desktop, then place it in `~/Desktop/data/`
+> 4. That's it!
+{: .prereq}
+
+It contains data from 53 different tissues for 56,202 human genes. The first 5 rows and 10 columns look like this:  
+
+| gene_id           | Description  | Adipose - Subcutaneous | Adipose - Visceral (Omentum) | Adrenal Gland | Artery - Aorta | Artery - Coronary | Artery - Tibial | Bladder |
+|-------------------|--------------|------------------------|------------------------------|---------------|----------------|-------------------|-----------------|---------|
+| ENSG00000223972.4 | DDX11L1      | 0.056945               | 0.05054                      | 0.0746        | 0.03976        | 0.04386           | 0.04977         | 0.05878 |
+| ENSG00000227232.4 | WASH7P       | 11.85                  | 9.753                        | 8.023         | 12.51          | 12.3              | 11.59           | 14.24   |
+| ENSG00000243485.2 | MIR1302-11   | 0.06146                | 0.05959                      | 0.08179       | 0.04297        | 0.05848           | 0.05184         | 0.06097 |
+| ENSG00000237613.2 | FAM138A      | 0.0386                 | 0.03245                      | 0.0405        | 0.02815        | 0.03678           | 0.03894         | 0.04113 |
+| ENSG00000268020.2 | OR4G4P       | 0.035695               | 0                            | 0.03479       | 0              | 0                 | 0               | 0       |
+| ENSG00000240361.1 | OR4G11P      | 0.04268                | 0.03988                      | 0.049065      | 0.03399        | 0                 | 0.04286         | 0       |
+| ENSG00000186092.4 | OR4F5        | 0.05145                | 0.04558                      | 0.06136       | 0              | 0.04069           | 0.04669         | 0.05461 |
+| ENSG00000238009.2 | RP11-34P13.7 | 0.1625                 | 0.1202                       | 0.087785      | 0.1351         | 0.1369            | 0.1472          | 0.143   |
+| ENSG00000233750.3 | CICP27       | 0.1244                 | 0.1347                       | 0.1488        | 0.1026         | 0.1195            | 0.1145          | 0.0761  | 
+
+<br>
+
 # Dataset #2 (DNA methylation and age)
 
 This dataset comes from the paper of [Bocklandt et al. 2011](https://doi.org/10.1371/journal.pone.0014821) on epigenetic prediction of human age.
