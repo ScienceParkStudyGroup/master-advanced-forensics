@@ -56,6 +56,7 @@ We import the libraries and dataset once more to provide a clean start.
 ~~~
 suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("cluster"))
+suppressPackageStartupMessages(library("pheatmap"))
 
 
 df_expr <- read.delim(file = "data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.tsv", 
@@ -313,11 +314,13 @@ This yields the following heatmap:
 # Gene expression profile
 
 ~~~
+genes <- labels(as.dendrogram(hcl_genes_ward))
+
+
 gene_to_cluster_group <- cutree(tree = hcl_genes_ward, k = 10) %>% 
   enframe() %>% 
   rename(gene = name, cluster = value) %>% 
-  mutate(gene_id = hcl_genes_ward$order.lab)
-
+  mutate(gene_id = genes)
 
 mat_expr_scaled_with_clusters = 
   mat_expr_scaled %>%
