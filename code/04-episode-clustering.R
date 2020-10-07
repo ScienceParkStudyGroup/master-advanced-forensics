@@ -1,6 +1,7 @@
 suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("cluster"))
-suppressPackageStartupMessages(library("broom"))
+suppressPackageStartupMessages(library("pheatmap"))
+suppressPackageStartupMessages(library("RColorBrewer"))
 
 
 #############
@@ -44,11 +45,11 @@ distances_between_tissues <- dist(t(mat_expr_scaled), method = "euclidean")
 as.matrix(distances_between_tissues)[1:5,1:5]
 
 # ward.D2 is equivalent to AGNES method
-hcl_ward <- cluster::agnes(x = distances_between_tissues,method = "ward")
+hcl_tissue_ward <- cluster::agnes(x = distances_between_tissues,method = "ward")
 
 par(mar=c(1,1,1,1))
 png("img/04-dendogram-ward.png", width = 1000, height = 600)
-plot(hcl_ward, main = "Tissue hierarchical clustering (AGNES and Ward's method)")
+plot(hcl_tissue_ward, main = "Tissue hierarchical clustering (AGNES and Ward's method)")
 dev.off()
 
 # The agglomerative coefficient  
@@ -66,13 +67,10 @@ purrr::map_dbl(m, function(x) ac(distances_between_tissues, x))
 ##   average    single  complete      ward 
 ## 0.9139303 0.8712890 0.9267750 0.9766577
 
+#################
+# Gene clustering
+#################
 
-##############
-# HCL on genes
-##############
-
-
-### Genes differential at least in one comparison
 df_expr_tidy <- df_expr %>%
   select(- Description) %>% 
   pivot_longer(- gene_id, names_to = "tissue", values_to = "tpm")
@@ -81,66 +79,67 @@ df_expr_tidy <- df_expr %>%
 df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
-  with(., summary(median_tpm))
+  with(., round(x = quantile(x = median_tpm, probs = c(
+    seq(from = 0,
+        to = 0.9,
+        by = 0.1), 
+    seq(from = 0.9, to = 1, by = 0.01)),
+                digits = 2)
+       )
+    )
 
-# 3rd quartile (genes with median TPM > 75th percentile)
-# 14,049 genes instead of over 56,000
+# 99% quartile (genes with median TPM > 90th percentile)
+# 560 genes instead of over 56,000
 genes_selected = 
   df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
   ungroup() %>% 
-  filter(median_tpm > 1.7) %>% 
+  filter(median_tpm > 112) %>% 
   dplyr::pull(gene_id)
 
-df_expr_tidy_filtered <- filter(df_expr_tidy, gene_id %in% genes_selected)
 
-## Step 1: extract gene TPM value in "Adipose - Subcutaneous"  
-adipose_gene_expression <- df_expr_tidy_filtered %>% 
-  filter(tissue == "Adipose - Subcutaneous") %>% 
-  select(gene_id, tpm) %>% 
-  rename(adipose_tpm = tpm)
+## clustering
+genes_mat <- subset(x = mat_expr_scaled, 
+                                 subset = rownames(mat_expr_scaled) %in% genes_selected)
 
-## Step 2: calculate median TPM value in all other tissues
-all_other_tissues_gene_expression <- 
-  df_expr_tidy_filtered %>% 
-  filter(tissue != "Adipose - Subcutaneous") %>% 
-  group_by(gene_id) %>% 
-  summarise(other_tissues_median_tpm = median(tpm))
+distances_between_genes = dist(x = genes_mat, method = "euclidean")
 
-## Merge the two dataframes
-## Calculate a fold change
-adipose_vs_other_tissues <- inner_join(x = adipose_gene_expression, 
-                                       y = all_other_tissues_gene_expression, 
-                                       by = "gene_id") %>% 
-  mutate(fc = adipose_tpm / other_tissues_median_tpm) %>% 
-  mutate(log2_fc = log2(fc)) 
+# The AGNES clustering method coupled to Ward's cluster dissimilarity estimation method
+hcl_genes_ward <- cluster::agnes(x = distances_between_genes, method = "ward")
 
-# calculate Z-score 
-mean_of_log2fc <- with(data = adipose_vs_other_tissues, mean(log2_fc))
-sd_of_log2fc <- with(data = adipose_vs_other_tissues, sd(log2_fc))
+# You can already create a dendrogram from this hierarchical cluster object (zoom to get additional details)
+plot(hcl_genes_ward,
+     which.plots = 2,
+     main = "Gene hierarchical clustering (AGNES, Ward method)")
 
-adipose_vs_other_tissues$zscore <- map_dbl(
-  adipose_vs_other_tissues$log2_fc, 
-  function(x) (x - mean_of_log2fc) / sd_of_log2fc
-  )
+par(mar=c(1,1,1,1))
+png("img/04-dendogram-genes-ward.png", width = 1000, height = 600)
+plot(hcl_genes_ward,
+     main = "Gene hierarchical clustering (AGNES and Ward's method)")
+dev.off()
 
-# normal distribution of log2FC?
-ggplot(adipose_vs_other_tissues, aes(x = log2_fc)) +
-  geom_density()
+#########
+# Heatmap
+#########
 
-# test for normality
-ks.test(x = adipose_vs_other_tissues$log2_fc, y = "pnorm", mean = mean_of_log2fc, sd = sd_of_log2fc)
+pheatmap(genes_mat, 
+         show_rownames = FALSE, 
+         cluster_rows = TRUE, 
+         cluster_cols = TRUE, 
+         clustering_distance_rows = "euclidean", 
+         clustering_distance_cols = "euclidean",
+         clustering_method = "ward.D2",
+         scale = "none")
 
-# filter fc > 0 + calculate one-sided p-value
-adipose_specific_genes = 
-  adipose_vs_other_tissues %>%  
-  filter(log2_fc > 0) %>% # FC superior to 1
-  mutate(pval = 1 - pnorm(zscore)) %>% 
-  filter(pval < 0.01) %>% 
-  arrange(desc(log2_fc))
+pheatmap(genes_mat, 
+         show_rownames = FALSE, 
+         cluster_rows = as.hclust(hcl_genes_ward), 
+         cluster_cols = as.hclust(hcl_tissue_ward), 
+         scale = "none")
 
-adipose_specific_genes
+
+
 
 
 

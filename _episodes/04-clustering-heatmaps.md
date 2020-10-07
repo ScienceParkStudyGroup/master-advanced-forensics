@@ -9,7 +9,9 @@ objectives:
 - "Understand how distances are calculated between two tissues based on their gene expression profile."
 - "Be able to name a few different clustering methods."
 keypoints:
-- ""
+- "Scaling of expression values is essential for distance calculation and hierarchical clustering."
+- "The clustering method of choice can have a profound impact "
+- "Although clustering is a powerful technique to describe data structure, it does not easily help to pinpoint at specific interesting genes."
 ---
 
 # Table of Contents
@@ -19,14 +21,17 @@ keypoints:
 - [1. Introduction](#1-introduction)
     - [1.1 Objective](#11-objective)
     - [1.1 Library and Data import](#11-library-and-data-import)
-- [2. Hierarchical Clustering](#2-hierarchical-clustering)
+- [2. Hierarchical Clustering of the tissues](#2-hierarchical-clustering-of-the-tissues)
     - [2.1 Scaling](#21-scaling)
     - [2.2 Distance matrix](#22-distance-matrix)
         - [Simple example](#simple-example)
         - [Real example](#real-example)
     - [2.3 Tissue hierarchical clustering](#23-tissue-hierarchical-clustering)
-    - [2.4 Gene clustering](#24-gene-clustering)
-    - [2.4 Extract cluster to gene correspondence](#24-extract-cluster-to-gene-correspondence)
+- [3. Hierarchical clustering of the genes](#3-hierarchical-clustering-of-the-genes)
+    - [3.1 Selecting a gene subset](#31-selecting-a-gene-subset)
+    - [3.2 Clustering](#32-clustering)
+- [4. Heatmaps](#4-heatmaps)
+- [5. Time to practice](#5-time-to-practice)
 - [References](#references)
 
 <!-- /MarkdownTOC -->
@@ -65,7 +70,7 @@ mat_expr <- df_expr %>%
 ~~~
 {: .language-r}
 
-# 2. Hierarchical Clustering
+# 2. Hierarchical Clustering of the tissues
 
 ## 2.1 Scaling 
 
@@ -155,10 +160,10 @@ Let's use the AGNES (AGlomerative NESting) method from the `cluster` package as 
 
 ~~~
 # The AGNES clustering method coupled to Ward's cluster dissimilarity estimation method
-hcl_ward <- cluster::agnes(x = distances_between_tissues,method = "ward")
+hcl_tissue_ward <- cluster::agnes(x = distances_between_tissues,method = "ward")
 
 You can already create a dendrogram from this hierarchical cluster object (zoom to get additional details)
-plot(hcl_ward)
+plot(hcl_tissue_ward)
 ~~~
 {: .language-r}
 
@@ -196,14 +201,130 @@ According to the results, it seems that Ward's method gives the highest agglomer
 ~~~
 {: .output}
 
-This analysis suggests that some gene expression profile can indeed drive 
 
-## 2.4 Gene clustering
-<center>In construction</center> :construction_worker: <center>In construction</center>
+# 3. Hierarchical clustering of the genes
 
-## 2.4 Extract cluster to gene correspondence
-<center>In construction</center> :construction_worker: <center>In construction</center>
+While tissue clustering was relatively easy due to the low number of tissues i.e. 53, there are simply too many genes (56,202) to perform a brute-force clustering approach. 
+
+Usually, one first search for differentially expressed genes for instance and then perform a clustering on this gene subset rather than the whole complete set.
+
+Here, we are going to select the most highly expressed genes in order to find specific and highly-expressed genes. 
+
+## 3.1 Selecting a gene subset
+
+To select a threshold for "highly expressed genes" in a meaningful way, we can compute the [percentiles](https://en.wikipedia.org/wiki/Percentile) of the gene TPM values.  
+
+~~~
+df_expr_tidy <- df_expr %>%
+  select(- Description) %>% 
+  pivot_longer(- gene_id, names_to = "tissue", values_to = "tpm")
+
+# getting the percentiles
+df_expr_tidy %>% 
+  group_by(gene_id) %>% 
+  summarise(median_tpm = median(tpm)) %>% 
+  with(., round(x = quantile(x = median_tpm, probs = c(
+    seq(from = 0,
+        to = 0.9,
+        by = 0.1), 
+    seq(from = 0.9, to = 1, by = 0.01)),
+                digits = 2)
+       )
+    )
+~~~
+{: .language-r}
+
+This indicates that 90% of the genes have a median TPM value inferior to 16.50. 
+
+~~~
+0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   90%   91%   92%   93%   94%   95%   96%   97%   98%   99%  100% 
+0     0     0     0     0     0     0     1     4    16    16    19    21    24    28    34    40    50    67    112  34805 
+~~~
+{: .output}
+
+By keeping only the "very highly expressed genes" (> 99th percentile), our number of genes under investigation falls from 56,202 to 560. 
+~~~
+genes_selected = 
+  df_expr_tidy %>% 
+  group_by(gene_id) %>% 
+  summarise(median_tpm = median(tpm)) %>% 
+  ungroup() %>% 
+  filter(median_tpm > 112) %>% 
+  dplyr::pull(gene_id)
+~~~
+{: .language-r} 
+
+## 3.2 Clustering
+
+Our gene expression set has already been converted to a matrix and scaled before (see section 2.1): the corresponding R object is called `mat_expr_scaled`.  
+Therefore, we will subset this matrix using our list of selected genes. 
+
+~~~
+genes_mat <- subset(x = mat_expr_scaled, 
+                    subset = rownames(mat_expr_scaled) %in% genes_selected)
+~~~
+{: .language-r}
+
+We then perform the whole distance to plot in one go. 
+~~~
+distances_between_genes = dist(x = genes_mat, method = "euclidean")
+
+# The AGNES clustering method coupled to Ward's cluster dissimilarity estimation method
+hcl_genes_ward <- cluster::agnes(x = distances_between_genes, method = "ward")
+
+# You can already create a dendrogram from this hierarchical cluster object (zoom to get additional details)
+plot(hcl_genes_ward,ask = FALSE, main = "Gene hierarchical clustering (AGNES, Ward method)")
+~~~
+{: .language-r}
+
+<img src="../img/04-dendogram-genes-ward.png" alt="Hierarchical clustering of the genes" width="100%">
+
+Groups of genes are visible on this dendrogram but we miss their relationship with the different tissues. 
+An option is to create a heatmap (false color matrix of expression values) with the tissue and gene clustering information superposed. 
+
+# 4. Heatmaps
+
+The `pheatmap` package is composed of a unique function called `pheatmap()`. The latter has many arguments and options that you can consult [here](https://www.rdocumentation.org/packages/pheatmap/versions/1.0.12/topics/pheatmap).
+
+One nice feature is the ability to pass our own clustering objects when building the heatmap. The only "trick" is to make sure the R objects are of class "hclust".
+~~~
+pheatmap(genes_mat, 
+         show_rownames = FALSE, 
+         cluster_rows = as.hclust(hcl_genes_ward), 
+         cluster_cols = as.hclust(hcl_tissue_ward), 
+         scale = "none")
+~~~
+{: .language-r}
+
+This yields the following heatmap:
+
+<img src="../img/04-heatmap.png" alt="heatmap with custom clusterings" width="80%">
+
+> ## Discussion
+> How easy is it to retrieve the very highly expressed genes related to the subcutaneous adipose tissue?
+{: .discussion}
+
+<br>
+
+# 5. Time to practice
+<br>
+
+> ## Exercise
+> Using the `mat_expr_scaled` scaled matrix of gene expression values, try to build several heatmaps with the pheatmap function:
+> 1. Using the first 1000 genes in the matrix.
+> 2. Using the first 5000 genes in the matrix.    
+> 3. See how far you can get 
+> Note: the heatmap construction will take increasing times to build.
+> Do you manage to identify a cluster of adipose-specific genes?
+{: .challenge}
+
+<br>
+
+> ## Warning 
+> Be careful! Do not attempt to perform the clustering on the whole matrix (around 42000 genes), you might crash your computer or be stuck so be careful with the number you choose. Rather, filter out low expressed genes in order to keep the maximum amount of information in your analysis. 
+{: .callout}
 
 
 # References
 - [Exploring gene expression patterns using clustering](https://tavareshugo.github.io/data-carpentry-rnaseq/04b_rnaseq_clustering.html)
+- [The R pheatmap package](https://cran.r-project.org/web/packages/pheatmap/)
