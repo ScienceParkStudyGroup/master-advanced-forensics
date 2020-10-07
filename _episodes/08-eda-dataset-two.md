@@ -28,6 +28,7 @@ keypoints:
   - [3.2 Slight upgrade](#32-slight-upgrade)
   - [3.3 Saving image on your hard drive](#33-saving-image-on-your-hard-drive)
   - [3.4 Saving the filtered tidy CpG dataset for the next episodes](#34-saving-the-filtered-tidy-cpg-dataset-for-the-next-episodes)
+- [4. Exercise](#4-exercise)
 - [References](#references)
 
 <!-- /MarkdownTOC -->
@@ -36,8 +37,14 @@ keypoints:
 
 ## 1.1 First steps
 
-First things first. Let's import the main dataset with the beta values. 
+First things first. Let's download and import the CpG beta values into R. 
 ~~~
+download.file(url = "https://zenodo.org/record/4056406/files/cpg_methylation_beta_values.tsv?download=1", 
+              destfile = "data/cpg_methylation_beta_values.tsv",
+              method = "wget", 
+              quiet = TRUE)
+
+
 df_cpg <- read.delim("data/cpg_methylation_beta_values.tsv",
                       header = TRUE, 
                       stringsAsFactors = FALSE)
@@ -56,9 +63,13 @@ df_cpg <- read.delim("data/cpg_methylation_beta_values.tsv",
 > {: .solution}
 {: .challenge}
 
-We can then import the other dataset that contains the age to sample correspondence.
-
+We can then download and import the age to sample correspondence into R.
 ~~~
+download.file(url = "https://zenodo.org/record/4056406/files/cpg_methylation_sample_age.tsv?download=1", 
+              destfile = "data/cpg_methylation_sample_age.tsv",
+              method = "wget", 
+              quiet = TRUE)
+
 # Import sample to age correspondence
 sample_age <- read.delim("data/cpg_methylation_sample_age.tsv", 
                           header = TRUE, 
@@ -423,6 +434,16 @@ write.table(x = final_df,
             sep = "\t")
 ~~~
 {: .language-r}
+
+# 4. Exercise
+
+> ## Exercise
+> Here, a one-way ANOVA was used to test the relationship between CpG site methylation level and age. 
+> 1. On which hypothesis the one-way ANOVA did rely? 
+> 2. Can you test some or all of these hypotheses using R?
+> 3. If these assumptions are not met, find the equivalent of a one-way ANOVA among non-parametric tests. You can search for `non-parametric ANOVA` in your favorite web search engine.  
+{: .challenge}
+
 # References
 - The [`broom()` package documentation](https://www.rdocumentation.org/packages/broom/versions/0.7.0)
 - A vignette to demonstrate the use of `dplyr`, `broom` and `map` altogether to perform nested computations: [Link](https://cran.r-project.org/web/packages/broom/vignettes/broom_and_dplyr.html)

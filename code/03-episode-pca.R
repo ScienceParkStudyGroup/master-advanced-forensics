@@ -48,7 +48,7 @@ ggplot(exp_var_df, aes(x = PC, y = exp_var, label = PC)) +
   scale_y_continuous(limits = c(0, 50)) +
   scale_x_continuous(breaks = seq(from = 1, to = 10, by = 1))
 
-ggsave(filename = "img/02-pca-all-components.png")
+ggsave(filename = "img/03-pca-all-components.png")
 
 ### How many PCs?
 exp_var_df = mutate(exp_var_df, cum_var = cumsum(exp_var)) 
@@ -60,7 +60,7 @@ ggplot(exp_var_df, aes(x = PC, y = cum_var)) +
   scale_x_continuous(breaks = 1:10) +
   geom_hline(yintercept = 80, color = "red")
   
-ggsave(filename = "img/02-pca-cumulative-variance.png")
+ggsave(filename = "img/03-pca-cumulative-variance.png")
 
 ### Scores
 scores <- pca$scores
@@ -78,7 +78,7 @@ ggplot(scores, aes(x = PC1, y = PC2, label = tissue_names)) +
   geom_text_repel() +
   guides(colour = FALSE)
 
-ggsave(filename = "img/02-dataset-1-score-plot-with-names.png")
+ggsave(filename = "img/03-dataset-1-score-plot-with-names.png")
 
 
 ## PC2 and PC3
@@ -90,7 +90,7 @@ ggplot(scores, aes(x = PC3, y = PC2, label = tissue_names)) +
   geom_text_repel() +
   guides(colour = FALSE)
 
-ggsave(filename = "img/02-dataset-1-score-plot-with-names-pc2-pc3.png")
+ggsave(filename = "img/03-dataset-1-score-plot-with-names-pc2-pc3.png")
 
 ## PC1 and PC3
 ggplot(scores, aes(x = PC1, y = PC3, label = tissue_names)) + 
@@ -101,20 +101,43 @@ ggplot(scores, aes(x = PC1, y = PC3, label = tissue_names)) +
   geom_text_repel() +
   guides(colour = FALSE)
 
+############
 ### Loadings
+############
+
 loadings <- pca$loadings %>%
   rownames_to_column("gene_id") 
-  
+
+
+### extract top genes  
 top10genes_PC1_PC3 <- 
   loadings %>% 
   pivot_longer(cols = - gene_id, names_to = "PC", values_to = "loadings") %>% 
   dplyr::filter(PC == "PC1" | PC == "PC3") %>% 
   group_by(PC) %>% 
-  dplyr::arrange(loadings) %>% 
+  dplyr::arrange(desc(abs(loadings))) %>% 
   dplyr::slice(1:10) %>% 
   left_join(x = ., y = df_expr[c("gene_id", "Description")], by = "gene_id")
 
 top10genes_PC1_PC3
+
+
+### loading plot
+
+loadings4plot <- inner_join(loadings, top10genes_PC1_PC3, by = "gene_id") %>% 
+  dplyr::select(gene_id, PC1, PC3)
+
+ggplot(loadings4plot) +
+  geom_segment(aes(x = 0, y = 0, xend = PC1, yend = PC3), 
+               arrow = arrow(length = unit(0.1, "in")),
+               colour = "brown") +
+  geom_text_repel(data = loadings4plot, 
+                  aes(x = PC1, y = PC3, label = gene_id),
+                  size = 2) + 
+  labs(x = "PC1", y = "PC3")
+
+ggsave(filename = "img/03-pca-loading-plot-20-genes.png")
+
 
 
 

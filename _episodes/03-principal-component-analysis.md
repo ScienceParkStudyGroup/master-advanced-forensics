@@ -24,6 +24,7 @@ keypoints:
   - [2.2 Performing the PCA analysis](#22-performing-the-pca-analysis)
   - [2.3 Number of components to extract: the scree plot](#23-number-of-components-to-extract-the-scree-plot)
   - [2.4 PCA score plot](#24-pca-score-plot)
+  - [2.4 Genes most related to PCs](#24-genes-most-related-to-pcs)
   - [2.4 PCA loading plot](#24-pca-loading-plot)
 - [3. Time to practice](#3-time-to-practice)
 - [4. References](#4-references)
@@ -229,6 +230,8 @@ There are many more things to learn on PCA (e.g. scaling, filtering) but that is
 
 For the rest of the lesson, we are going to filter our gene expression dataset to retain only 10 tissues to simplify the analysis. This will not change your main goal (e.g. find subcutaneous fat adipose-related genes). 
 
+Performing a PCA will tell us whether some structure is present in our tissue expression dataset. It is often a sanity check to see how our experimental design is related to variation in the data. 
+
 ## 2.1 Data filtering and transformation
 
 Let's first import the gene expression dataset and filter it. 
@@ -284,6 +287,7 @@ Adrenal Gland                         0.074600             8.023           0.081
 Artery - Aorta                        0.039760            12.510           0.04297           0.02815
 Artery - Coronary                     0.043860            12.300           0.05848           0.03678
 ~~~
+{: .output}
 
 We are now ready to actually perform the PCA itself.
 
@@ -308,7 +312,10 @@ A scree plot is useful to determine the number of principal components to retain
 
 A scree plot displays the explained variance (in %) as a factor of the number of PCs in the form of a downward curve. if an "elbow" can be seen on the curve with a flat line afterwards, you can retain the number of PCs that is indicated by the "elbow".
 
-The maximum number of PC that can be built is equal to the number of variables (genes) in the dataset. The first PC should account for the largest possible variance in the data set, the second for the second largest, etc.
+Mathematically, the maximum number of PCs that can be built is equal to the matrix rank (number of linearly independent columns of a matrix). In practice, this is equal to the minimum of the number of rows and columns.   
+
+In our example, our `df_expr_transposed` dataset has 10 rows (tissues) and 56,202 columns (genes): therefore, we can at best build 10 PCs.  
+The first PC should account for the largest possible variance in the data set, the second for the second largest, etc.
 
 ~~~
 # make the complete screeplot
@@ -331,19 +338,20 @@ ggplot(exp_var_df, aes(x = PC, y = exp_var, label = PC)) +
 > {: .solution}
 {: .challenge }
 
-The plot above clearly shows that only one principal component manages to catch up around 45\% of the total variance. This is actually a sign that we should easily distinguish the different tissues using only one PC. Yet, you can also see that PC2, PC3 and PC4 also explain around 10\% of the total variance therefore suggesting that they may also comprise relevant biological information. 
+The scree plot above clearly shows that one principal component manages to catch up around 45% of the total variance. Whether this is related to our different tissues remains to be seen. Yet, you can also see that PC2, PC3 and PC4 also explain around 10% of the total variance therefore suggesting that they may also comprise relevant (biological) information. 
+
+We will see how a _score plot_ can help to determine how PCs are related to our tissues in the new coordinate system.
 
 > ## Callout
-> There is another way to determine the number of PC to keep that is less human-biased. You choose the % of variance that you wish to explain using the 
-> minimal number of PCs. Then, you extract the number of PC automatically.
+> There is another way to determine the number of PC. Instead of looking for an "elbow" (inflexion point) in the scree plot, one chooses the percentage of variance to be explained in advance and determines how many PCs are necessary and sufficient to explain this percentage of variance.  
 {: .callout} 
 
-Let's practice this less biased method.
+Let's practice this alternative method.
 
 > ## Exercise
 > Assuming that you want to explain 80% of the variance, how many PCs would you need?
 > 1. Knowing that the `cumsum()` function can be used to calculate a cumulative sum, add a column to the `exp_var_df` that contains the cumulative variance explained by PC1, PC2, etc.
-> 2. Make a plot using `ggplot()` that displays the cumulative variance explained by the different PCs. Add a horizontal line that shows the 80\% variance threshold. 
+> 2. Make a plot using `ggplot()` that displays the cumulative variance explained by the different PCs. Add a horizontal line that shows the 80% variance threshold. 
 > 3. Automatically extract the number of PCs sufficient to explain 80% of the total variance. 
 > 
 > > ## Solution
@@ -453,11 +461,12 @@ We do see some groupings among our tissues. In particular, it is quite clear tha
 
 <img src="../img/02-dataset-1-score-plot-with-names-pc2-pc3.png" alt="score plot for PC2 and PC3" width="50%">
 
-## 2.4 PCA loading plot
+## 2.4 Genes most related to PCs
 
 Since the principal components are built using weighted combinations of the initial variables (genes here), it is possible to retrieve these variable coefficients that are called "loadings".
 
-A high loading for one gene on a given PC indicates that this gene has a high contribution to the constructino of the given PC.
+A high loading for one gene on a given PC indicates that this gene has a high contribution to the construction of the given PC.
+
 
 Let's extract the 10 genes with the highest contribution to PC1, PC2 and PC3 for instance. 
 
@@ -481,13 +490,9 @@ loadings[1:5,1:5]
 {: .output}
 
 
-In our case, it seems that adipose tissues can be separated from the others using a combinatino of PC1 and PC3. While PC1 separates the brain tissues from the other tissues, PC3 separates the adipose tissues together with the _adrenal gland_ tissue. 
+In our case, it seems that adipose tissues can be separated from the others using a combination of PC1 and PC3. While PC1 separates the brain tissues from the other tissues, PC3 separates the adipose tissues together with the _adrenal gland_ tissue. 
 
-Let's extract the genes that have the higher loadings on PC1 and PC3.
-
-> ## Callout
-> Take a look at the two previous plots (PC1-PC2, PC2-PC3). You will see that adipose-related tissues have negative coordinates on the new PC axis. Therefore, we need to extract the _most negative_ loadings on PC1 and PC3. 
-{: .callout}
+Let's extract the genes that have the higher loadings on PC1 and PC3. 
 
 Let's use a bit of `dplyr` & `tidyr` magic here. 
 ~~~
@@ -496,15 +501,17 @@ top10genes_PC1_PC3 <-
   pivot_longer(cols = - gene_id, names_to = "PC", values_to = "loadings") %>% 
   dplyr::filter(PC == "PC1" | PC == "PC3") %>%                                           # PC1 or PC3 are selected
   group_by(PC) %>% 
-  dplyr::arrange(loadings) %>%                                                           # sort by most negative value first (based on coord. in previous plots)
+  arrange(desc(abs(loadings))) %>%                                                                                                       
   dplyr::slice(1:10) %>% 
   left_join(x = ., y = df_expr[c("gene_id", "Description")], by = "gene_id")             # add back gene symbol
 ~~~
 {: .language-r}  
 
-Here are the 10 genes most related to PC1 and PC2 according to their loadings.   
+Here are the 10 genes most related to PC1 and PC2 according to their absolute loading score.   
 
 ~~~
+# A tibble: 20 x 4
+# Groups:   PC [2]
    gene_id            PC    loadings Description  
    <chr>              <chr>    <dbl> <chr>        
  1 ENSG00000104529.13 PC1   -0.00812 EEF1D        
@@ -517,36 +524,66 @@ Here are the 10 genes most related to PC1 and PC2 according to their loadings.
  8 ENSG00000162736.11 PC1   -0.00809 NCSTN        
  9 ENSG00000203865.5  PC1   -0.00809 ATP1A1OS     
 10 ENSG00000113838.8  PC1   -0.00809 TBCCD1       
-11 ENSG00000253785.1  PC3   -0.0139  CTC-308K20.3 
-12 ENSG00000182890.3  PC3   -0.0136  GLUD2        
-13 ENSG00000271500.1  PC3   -0.0136  RP11-288K12.1
-14 ENSG00000254003.1  PC3   -0.0134  CTB-167B5.1  
-15 ENSG00000271367.1  PC3   -0.0134  RP3-483K16.4 
-16 ENSG00000227440.1  PC3   -0.0130  ATP5G1P4     
-17 ENSG00000232623.1  PC3   -0.0130  AP000266.7   
-18 ENSG00000230911.1  PC3   -0.0129  PPIHP1       
-19 ENSG00000235559.1  PC3   -0.0129  NOL5BP       
-20 ENSG00000231916.1  PC3   -0.0128  AC006033.22  
+11 ENSG00000250790.3  PC3    0.0147  RP11-46H11.3 
+12 ENSG00000235217.5  PC3    0.0146  TSPY26P      
+13 ENSG00000148411.3  PC3    0.0145  NACC2        
+14 ENSG00000205531.8  PC3    0.0145  NAP1L4       
+15 ENSG00000172058.11 PC3    0.0144  SERF1A       
+16 ENSG00000204947.4  PC3    0.0144  ZNF425       
+17 ENSG00000257391.1  PC3    0.0144  MIR3180-4    
+18 ENSG00000261584.1  PC3    0.0143  RP11-457M11.5
+19 ENSG00000115718.13 PC3    0.0143  PROC         
+20 ENSG00000234155.1  PC3    0.0143  RP11-30P6.6  
 ~~~
 {: .output}
+
+
+## 2.4 PCA loading plot
+
+These 20 genes can be plotted as a loading plot. 
+~~~
+loadings4plot <- inner_join(loadings, top10genes_PC1_PC3, by = "gene_id") %>% 
+  dplyr::select(gene_id, PC1, PC3)
+
+ggplot(loadings4plot) +
+  geom_segment(aes(x = 0, y = 0, xend = PC1, yend = PC3), 
+               arrow = arrow(length = unit(0.1, "in")),
+               colour = "brown") +
+  geom_text_repel(data = loadings4plot, 
+                  aes(x = PC1, y = PC3, label = gene_id),
+                  size = 2) + 
+  labs(x = "PC1", y = "PC3")
+~~~
+{: .language-r}
+
+<img src="../img/03-pca-loading-plot-20-genes.png" alt="loading plot" width="50%">
+
 
 > ## Question
 > Go to the [GTEx portal](https://www.gtexportal.org/home/) and search additional information about these genes.   
 >  What do you think about the genes that are most related to PC1 and PC3? Are these likely to be adipose-specific genes?
 {: .challenge}
 
+[//]: # (plot the gene profile per tissue)
+
+
 # 3. Time to practice
+<br>
 
 > ## Exercise 1
 > Perform the PCA analysis _without_ prior scaling of the data. Hint: set the `scale` argument of the `mypca()` function to `FALSE`.     
 > What are the consequences on the score and loading plots?
 {: .challenge}
 
+<br>
+
 > ## Exercise 2
 > Re-import the original data file and select the first 15 tissues instead of the first 10.   
 > Create the score plots for PC1-PC2 and PC2-PC3.  
 > How many PCs do you need to catch 80% of the variance now?
 {: .challenge}   
+
+<br>
 
 # 4. References
 - Hugo Tavares [PCA step-by-step guide](https://tavareshugo.github.io/data-carpentry-rnaseq/03_rnaseq_pca.html)
