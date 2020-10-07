@@ -109,13 +109,16 @@ distances_between_genes = dist(x = genes_mat, method = "euclidean")
 hcl_genes_ward <- cluster::agnes(x = distances_between_genes, method = "ward")
 
 # You can already create a dendrogram from this hierarchical cluster object (zoom to get additional details)
+par(mar=c(4,5,2,2))
 plot(hcl_genes_ward,
+     labels = FALSE,
      which.plots = 2,
      main = "Gene hierarchical clustering (AGNES, Ward method)")
 
 par(mar=c(1,1,1,1))
 png("img/04-dendogram-genes-ward.png", width = 1000, height = 600)
 plot(hcl_genes_ward,
+     labels = FALSE,
      main = "Gene hierarchical clustering (AGNES and Ward's method)")
 dev.off()
 
@@ -123,20 +126,51 @@ dev.off()
 # Heatmap
 #########
 
-pheatmap(genes_mat, 
-         show_rownames = FALSE, 
-         cluster_rows = TRUE, 
-         cluster_cols = TRUE, 
-         clustering_distance_rows = "euclidean", 
-         clustering_distance_cols = "euclidean",
-         clustering_method = "ward.D2",
-         scale = "none")
 
-pheatmap(genes_mat, 
+p <- pheatmap(genes_mat, 
          show_rownames = FALSE, 
          cluster_rows = as.hclust(hcl_genes_ward), 
          cluster_cols = as.hclust(hcl_tissue_ward), 
          scale = "none")
+p
+
+
+png("img/04-heatmap.png", width = 1000, height = 600)
+p
+dev.off()
+
+### Gene profiles per cluster
+gene_to_cluster_group <- cutree(tree = hcl_genes_ward, k = 10) %>% 
+  enframe() %>% 
+  rename(gene = name, cluster = value) %>% 
+  mutate(gene_id = hcl_genes_ward$order.lab)
+
+
+mat_expr_scaled_with_clusters = 
+  mat_expr_scaled %>%
+  as.data.frame() %>% 
+  rownames_to_column("gene_id") %>% 
+  pivot_longer(cols = - gene_id, names_to = "tissue", values_to = "scaled_value") %>%  
+  inner_join(x = ., y = gene_to_cluster_group, by = "gene_id") 
+  
+
+ggplot(mat_expr_scaled_with_clusters, aes(x = tissue, y = scaled_value)) +
+  geom_line(aes(group = gene_id)) +
+  facet_wrap( ~ cluster) +
+  stat_summary(aes(group = 1), fun = "median", colour = "brown", geom = "line", size = 1.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 1))
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

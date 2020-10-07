@@ -29,8 +29,9 @@ keypoints:
     - [2.3 Tissue hierarchical clustering](#23-tissue-hierarchical-clustering)
 - [3. Hierarchical clustering of the genes](#3-hierarchical-clustering-of-the-genes)
     - [3.1 Selecting a gene subset](#31-selecting-a-gene-subset)
-    - [3.2 Clustering](#32-clustering)
+    - [3.2 Gene clustering](#32-gene-clustering)
 - [4. Heatmaps](#4-heatmaps)
+- [Gene expression profile](#gene-expression-profile)
 - [5. Time to practice](#5-time-to-practice)
 - [References](#references)
 
@@ -254,7 +255,7 @@ genes_selected =
 ~~~
 {: .language-r} 
 
-## 3.2 Clustering
+## 3.2 Gene clustering
 
 Our gene expression set has already been converted to a matrix and scaled before (see section 2.1): the corresponding R object is called `mat_expr_scaled`.  
 Therefore, we will subset this matrix using our list of selected genes. 
@@ -273,7 +274,10 @@ distances_between_genes = dist(x = genes_mat, method = "euclidean")
 hcl_genes_ward <- cluster::agnes(x = distances_between_genes, method = "ward")
 
 # You can already create a dendrogram from this hierarchical cluster object (zoom to get additional details)
-plot(hcl_genes_ward,ask = FALSE, main = "Gene hierarchical clustering (AGNES, Ward method)")
+plot(hcl_genes_ward,
+     labels = FALSE,  # remove unreadable gene names
+     which.plots = 2,
+     main = "Gene hierarchical clustering (AGNES, Ward method)")
 ~~~
 {: .language-r}
 
@@ -305,6 +309,40 @@ This yields the following heatmap:
 {: .discussion}
 
 <br>
+
+# Gene expression profile
+
+~~~
+gene_to_cluster_group <- cutree(tree = hcl_genes_ward, k = 10) %>% 
+  enframe() %>% 
+  rename(gene = name, cluster = value) %>% 
+  mutate(gene_id = hcl_genes_ward$order.lab)
+
+
+mat_expr_scaled_with_clusters = 
+  mat_expr_scaled %>%
+  as.data.frame() %>% 
+  rownames_to_column("gene_id") %>% 
+  pivot_longer(cols = - gene_id, names_to = "tissue", values_to = "scaled_value") %>%  
+  inner_join(x = ., y = gene_to_cluster_group, by = "gene_id") 
+  
+
+ggplot(mat_expr_scaled_with_clusters, aes(x = tissue, y = scaled_value)) +
+  geom_line(aes(group = gene_id)) +
+  facet_wrap( ~ cluster) +
+  stat_summary(aes(group = 1), fun = "median", colour = "brown", geom = "line", size = 1.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 1))
+~~~
+{: .language-r}
+
+<img src="../img/04-gene-expression-profiles.png" width="80%">
+
+> ## Exercise
+> 1. There is clearly an issue with the previous plot. Can you determine which one?
+> 2. Can you correct the code to plot the correct figure then?
+> > ## Solution
+> > 1. The gene expression profiles per cluster are not very different from each other while they should.  
+{: .challenge}
 
 # 5. Time to practice
 <br>
