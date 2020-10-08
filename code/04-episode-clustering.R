@@ -75,27 +75,22 @@ df_expr_tidy <- df_expr %>%
   select(- Description) %>% 
   pivot_longer(- gene_id, names_to = "tissue", values_to = "tpm")
 
-# a lot of genes have very small TPM values
+### Filter genes based on a population percentile
+percentile = 0.99
+
+threshold = 
 df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
-  with(., round(x = quantile(x = median_tpm, probs = c(
-    seq(from = 0,
-        to = 0.9,
-        by = 0.1), 
-    seq(from = 0.9, to = 1, by = 0.01)),
-                digits = 2)
-       )
-    )
+  with(., round(x = quantile(x = median_tpm, probs = percentile))) %>% 
+  as.integer()
 
-# 99% quartile (genes with median TPM > 90th percentile)
-# 560 genes instead of over 56,000
 genes_selected = 
   df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
   ungroup() %>% 
-  filter(median_tpm > 112) %>% 
+  filter(median_tpm > threshold) %>% 
   dplyr::pull(gene_id)
 
 
@@ -165,19 +160,6 @@ ggplot(mat_expr_scaled_with_clusters, aes(x = tissue, y = scaled_value)) +
   theme(axis.text.x = element_text(angle = 90, size = 1))
 
 ggsave(filename = "img/04-gene-expression-profiles.png")
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

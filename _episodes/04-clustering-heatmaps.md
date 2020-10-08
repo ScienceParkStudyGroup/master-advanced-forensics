@@ -1,5 +1,5 @@
 ---
-title: "Clustering and heatmaps"
+title: "Hierarchical clustering and heatmaps"
 teaching: 30
 exercises: 45
 questions:
@@ -371,3 +371,4 @@ ggplot(mat_expr_scaled_with_clusters, aes(x = tissue, y = scaled_value)) +
 # References
 - [Exploring gene expression patterns using clustering](https://tavareshugo.github.io/data-carpentry-rnaseq/04b_rnaseq_clustering.html)
 - [The R pheatmap package](https://cran.r-project.org/web/packages/pheatmap/)
+- [DataCamp tutorial on hierarchical clustering with R](https://www.datacamp.com/community/tutorials/hierarchical-clustering-R)

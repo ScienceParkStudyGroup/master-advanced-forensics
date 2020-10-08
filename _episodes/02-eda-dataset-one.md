@@ -51,6 +51,9 @@ You can also check this within R using the `getwd()` command.
 
 ~~~
 getwd()
+
+# create the data/ folder
+dir.create("data/")
 ~~~
 {: .language-r}
 
