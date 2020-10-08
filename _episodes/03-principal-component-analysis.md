@@ -438,7 +438,7 @@ ggplot(scores, aes(x = PC1, y = PC2, label = tissue_names)) +
 
 
 
-<img src="../img/02-dataset-1-score-plot-with-names.png" alt="score plot for PC1 and PC2" width="50%">
+<img src="../img/03-dataset-1-score-plot-with-names.png" alt="score plot for PC1 and PC2" width="50%">
 
 We do see some groupings among our tissues. In particular, it is quite clear that _brain_ tissues distinguish themselves based on PC1 while the _bladder_ and _adrenal gland_ are separated from the other tissues on PC2. 
 
@@ -462,7 +462,7 @@ We do see some groupings among our tissues. In particular, it is quite clear tha
 > {: .solution}
 {: .challenge}
 
-<img src="../img/02-dataset-1-score-plot-with-names-pc2-pc3.png" alt="score plot for PC2 and PC3" width="50%">
+<img src="../img/03-dataset-1-score-plot-with-names-pc2-pc3.png" alt="score plot for PC2 and PC3" width="50%">
 
 ## 2.4 Genes most related to PCs
 
