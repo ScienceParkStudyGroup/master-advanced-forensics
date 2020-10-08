@@ -1,5 +1,5 @@
 ---
-title: "Finding candidate genes through feature engineering"
+title: "Finding tissue-specific genes through feature engineering"
 teaching: 0
 exercises: 45
 questions:
@@ -126,6 +126,10 @@ Since our sample size is relatively large (> 50), we can perform a $$Z$$-test an
 ggplot(adipose_vs_other_tissues, aes(x = log2_fc)) +
   geom_density()
 
+  # calculate Z-score 
+mean_of_log2fc <- with(data = adipose_vs_other_tissues, mean(log2_fc))
+sd_of_log2fc <- with(data = adipose_vs_other_tissues, sd(log2_fc))
+
 # test for normality
 ks.test(x = adipose_vs_other_tissues$log2_fc, y = "pnorm", mean = mean_of_log2fc, sd = sd_of_log2fc)
 ~~~
@@ -157,10 +161,6 @@ Although our data is not strictly normal _sensu stricto_, we will assume it is f
 The $$Z$$-test can be used to test whether an observed $$log_{2}$$ fold change is significantly different from the population average $$log_{2}$$ fold changes. To perform this analysis, we can compute the $$Z$$-score for each of the $$log_{2}$$. In turn, this allows to convert this score to a probability for each of the individual gene fold change.   
 
 ~~~
-# calculate Z-score 
-mean_of_log2fc <- with(data = adipose_vs_other_tissues, mean(log2_fc))
-sd_of_log2fc <- with(data = adipose_vs_other_tissues, sd(log2_fc))
-
 adipose_vs_other_tissues$zscore <- map_dbl(
   adipose_vs_other_tissues$log2_fc, 
   function(x) (x - mean_of_log2fc) / sd_of_log2fc
