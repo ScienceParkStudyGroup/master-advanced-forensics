@@ -104,11 +104,13 @@ This is the second way to install softwares and packages. It _should_ work but t
 
 This dataset comes from the [Genotype-Tissue Expression (GTEx) database](https://www.gtexportal.org/home/) that gathers gene expression data from various human tissues. Specifically, the __GTEx Analysis v7__ version was used. 
 
+One file contains the whole expression dataset while the other list 195 genes with an adipose-favored tissue expression. 
+
 > ## Download the required datasets
 > [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4068260.svg)](https://doi.org/10.5281/zenodo.4068260)
 > 1. Go to the corresponding data record on [Zenodo](https://doi.org/10.5281/zenodo.4068260).
-> 2. You will see one single dataset that you need to download to your computer. 
-> 3. Download the dataset to your machine and place it into a folder called `data/`. For instance, if you work on your Desktop, then place it in `~/Desktop/data/`
+> 2. You will see two datasets that you need to download to your computer. 
+> 3. Download the datasets to your machine and place it into a folder called `data/`. For instance, if you work on your Desktop, then place it in `~/Desktop/data/`
 > 4. That's it!
 {: .prereq}
 

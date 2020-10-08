@@ -31,7 +31,7 @@ keypoints:
     - [3.1 Selecting a gene subset](#31-selecting-a-gene-subset)
     - [3.2 Gene clustering](#32-gene-clustering)
 - [4. Heatmaps](#4-heatmaps)
-- [Gene expression profile](#gene-expression-profile)
+- [5. Gene expression profile](#5-gene-expression-profile)
 - [5. Time to practice](#5-time-to-practice)
 - [References](#references)
 
@@ -164,8 +164,9 @@ Let's use the AGNES (AGlomerative NESting) method from the `cluster` package as 
 # The AGNES clustering method coupled to Ward's cluster dissimilarity estimation method
 hcl_tissue_ward <- cluster::agnes(x = distances_between_tissues,method = "ward")
 
-You can already create a dendrogram from this hierarchical cluster object (zoom to get additional details)
-plot(hcl_tissue_ward)
+# You can already create a dendrogram from this hierarchical cluster object 
+plot(hcl_tissue_ward, 
+    hang  = -1) # this ensures that labels end up at the same level
 ~~~
 {: .language-r}
 
@@ -311,7 +312,7 @@ This yields the following heatmap:
 
 <br>
 
-# Gene expression profile
+# 5. Gene expression profile
 
 ~~~
 genes <- labels(as.dendrogram(hcl_genes_ward))

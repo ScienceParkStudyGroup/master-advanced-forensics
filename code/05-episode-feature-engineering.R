@@ -90,21 +90,23 @@ head(adipose_specific_genes, n = 10)
 # Clustering
 ##########
 
+genes2keep <- adipose_specific_genes$gene_id[1:20]
+
 adipose_mat <- df_expr_tidy %>% 
-  dplyr::filter(gene_id %in% adipose_specific_genes$gene_id) %>% 
+  dplyr::filter(gene_id %in% genes2keep) %>% 
   pivot_wider(id_cols = gene_id, names_from = "tissue", values_from = "tpm") %>% 
   column_to_rownames("gene_id") %>% 
   as.matrix()
 
-adipose_mat_scaled <- mat_expr %>% 
+adipose_mat_scaled <- adipose_mat %>% 
   t() %>% 
   scale(center = TRUE, scale = TRUE) %>% 
   t() %>% 
   na.omit()
 
-distances_between_genes = dist(x = adipose_mat_scaled, method = "euclidean")
-
-# The AGNES clustering method coupled to Ward's cluster dissimilarity estimation method
-hcl_adipose_genes_ward <- cluster::agnes(x = distances_between_genes, method = "ward")
-
-pheatmap::pheatmap(adipose_mat_scaled, labels_row = FALSE)
+pheatmap::pheatmap(adipose_mat_scaled, 
+                   clustering_distance_cols = "euclidean", 
+                   clustering_distance_rows = "euclidean", 
+                   clustering_method = "ward.D2", 
+                   show_rownames = TRUE, 
+                   fontsize_row = 6)

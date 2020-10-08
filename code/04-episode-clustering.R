@@ -119,10 +119,10 @@ plot(hcl_genes_ward,
 dev.off()
 
 #########
-# Heatmap
+# Heatmap 
 #########
 
-
+# heatmap on genes selected on the basis of their high expression
 p <- pheatmap(genes_mat, 
          show_rownames = FALSE, 
          cluster_rows = as.hclust(hcl_genes_ward), 
@@ -130,13 +130,34 @@ p <- pheatmap(genes_mat,
          scale = "none")
 p
 
-
 png("img/04-heatmap.png", width = 1000, height = 600)
 p
 dev.off()
 
-### Gene profiles per cluster
+### heatmap based on their adipose-favored expression profile
+adipose_specific_genes <- read_delim(file = "data/genes_with_a_subcutaneous_adipose_favored_expression.tsv",
+                                    delim = "\t")
 
+adipose_specific_genes_filtered = 
+  adipose_specific_genes %>% 
+  filter(log2_fc > 3)
+
+adipose_mat <- df_expr_tidy %>% 
+  filter(gene_id %in% adipose_specific_genes_filtered$gene_id) %>% 
+  pivot_wider(id_cols = gene_id, names_from = "tissue", values_from = "tpm") %>% 
+  column_to_rownames("gene_id")
+
+adipose_mat_scaled <- adipose_mat %>%
+  t() %>% 
+  scale() %>% 
+  t()
+  
+p <- pheatmap(adipose_mat_scaled)
+p
+
+#############################
+### Gene profiles per cluster
+#############################
 genes <- labels(as.dendrogram(hcl_genes_ward))
 
 
