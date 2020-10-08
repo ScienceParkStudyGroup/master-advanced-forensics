@@ -318,6 +318,9 @@ In our example, our `df_expr_transposed` dataset has 10 rows (tissues) and 56,20
 The first PC should account for the largest possible variance in the data set, the second for the second largest, etc.
 
 ~~~
+# Create a dataframe with all PC components (n = number of tissues)
+exp_var_df <- data.frame(PC = seq(1:nrow(pca$explained_var)), exp_var = pca$explained_var)
+
 # make the complete screeplot
 ggplot(exp_var_df, aes(x = PC, y = exp_var, label = PC)) +
   ylab('explained variance (%)') + 
