@@ -2,6 +2,7 @@ suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("cluster"))
 suppressPackageStartupMessages(library("pheatmap"))
 suppressPackageStartupMessages(library("dendextend"))
+suppressPackageStartupMessages(library("broom"))
 
 
 #############
@@ -160,8 +161,4 @@ ggplot(mat_expr_scaled_with_clusters, aes(x = tissue, y = scaled_value)) +
   theme(axis.text.x = element_text(angle = 90, size = 1))
 
 ggsave(filename = "img/04-gene-expression-profiles.png")
-
-
-
-
 

@@ -51,6 +51,21 @@ Here, feature engineering refers to the grouping of the other tissues under a ne
 
 ## 2.1 Filtering genes with low expression values
 
+Import or re-import the data first. 
+~~~
+df_expr <- read.delim(file = "data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.tsv", 
+                      header = TRUE, 
+                      stringsAsFactors = FALSE,
+                      check.names = FALSE)
+
+
+df_expr_tidy <- df_expr %>%
+  select(- Description) %>% 
+  pivot_longer(- gene_id, names_to = "tissue", values_to = "tpm")
+~~~
+{: .language-r}
+
+
 ~~~
 threshold = df_expr_tidy %>% 
   group_by(gene_id) %>% 
@@ -169,7 +184,7 @@ head(adipose_specific_genes, n = 10)
 ~~~
 {: .language-r}
 
-This yields the top 10 genes which should ideally
+This yields the top 10 genes:
 ~~~
 # A tibble: 10 x 7
    gene_id           adipose_tpm other_tissues_median_tpm    fc log2_fc zscore     pval
@@ -187,10 +202,21 @@ This yields the top 10 genes which should ideally
 ~~~
 {: .language-r}
 
+In total, you should have __195__ genes with a significant positive fold change related to subcutaneous adipose tissue.  
 <br>
 
-> ## Exercise
+> ## Exercise 1
 > Navigate to the [GTEx portal](https://www.gtexportal.org/home/) and search for additional information about these genes.
 {: .challenge}
+
+<br>
+
+> ## Exercise 2
+> Heatmap revived! Using the list of subcutaneous adipose-related genes:
+> 1. Filter the original dataset to keep only the 195 adipose-related genes.
+> 2. Convert to matrix and scale the matrix so that gene expression values become comparable. 
+> 3. Build a heatmap using your own clustering method (or the default one from `pheatmap()`)
+{: .challenge}
+
 
 
