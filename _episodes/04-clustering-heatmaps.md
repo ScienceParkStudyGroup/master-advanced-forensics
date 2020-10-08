@@ -343,8 +343,10 @@ ggplot(mat_expr_scaled_with_clusters, aes(x = tissue, y = scaled_value)) +
 > ## Exercise
 > 1. There is clearly an issue with the previous plot. Can you determine which one?
 > 2. Can you correct the code to plot the correct figure then?
+>
 > > ## Solution
-> > 1. The gene expression profiles per cluster are not very different from each other while they should.  
+> > The gene expression profiles per cluster are not very different from each other while they should.  
+> {: .solution}
 {: .challenge}
 
 # 5. Time to practice

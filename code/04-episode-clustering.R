@@ -140,10 +140,14 @@ p
 dev.off()
 
 ### Gene profiles per cluster
+
+genes <- labels(as.dendrogram(hcl_genes_ward))
+
+
 gene_to_cluster_group <- cutree(tree = hcl_genes_ward, k = 10) %>% 
   enframe() %>% 
   rename(gene = name, cluster = value) %>% 
-  mutate(gene_id = hcl_genes_ward$order.lab)
+  mutate(gene_id = genes)
 
 
 mat_expr_scaled_with_clusters = 

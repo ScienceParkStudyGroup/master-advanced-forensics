@@ -10,28 +10,27 @@ df_expr <- read.delim(file = "data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gen
                       check.names = FALSE)
 
 
+df_expr_tidy <- df_expr %>%
+  select(- Description) %>% 
+  pivot_longer(- gene_id, names_to = "tissue", values_to = "tpm")
 
 ##############
 # Feature engineering
 ##############
 
 
-### Small TPM values
-df_expr_tidy <- df_expr %>%
-  select(- Description) %>% 
-  pivot_longer(- gene_id, names_to = "tissue", values_to = "tpm") %>% 
+### 90th percentile
+threshold = df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
-  with(., summary(median_tpm))
+  with(., round(x = quantile(x = median_tpm, probs = 0.9)))
 
-# 3rd quartile (genes with median TPM > 75th percentile)
-# 14,049 genes instead of over 56,000
 genes_selected = 
   df_expr_tidy %>% 
   group_by(gene_id) %>% 
   summarise(median_tpm = median(tpm)) %>% 
   ungroup() %>% 
-  filter(median_tpm > 1.7) %>% 
+  filter(median_tpm > threshold) %>% 
   dplyr::pull(gene_id)
 
 df_expr_tidy_filtered <- filter(df_expr_tidy, gene_id %in% genes_selected)
@@ -68,7 +67,9 @@ adipose_vs_other_tissues$zscore <- map_dbl(
 
 # normal distribution of log2FC?
 ggplot(adipose_vs_other_tissues, aes(x = log2_fc)) +
-  geom_density()
+  geom_density(fill = "lightblue")
+
+ggsave(filename = "img/05-log2-fc-distribution.png")
 
 # test for normality
 ks.test(x = adipose_vs_other_tissues$log2_fc, y = "pnorm", mean = mean_of_log2fc, sd = sd_of_log2fc)
