@@ -388,7 +388,7 @@ Let's practice this alternative method.
 > {: .solution}
 {: .challenge }
 
-<img src="../img/02-pca-cumulative-variance.png" alt="cumulative variance explained" width="50%">
+<img src="../img/03-pca-cumulative-variance.png" alt="cumulative variance explained" width="50%">
 
 4 principal components would be enough to explain more than 80% of the variance here. 
 
