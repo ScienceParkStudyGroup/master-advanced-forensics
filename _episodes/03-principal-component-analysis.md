@@ -1,13 +1,14 @@
 ---
 title: "Principal Component Analysis (PCA)"
-teaching: 30
-exercises: 30
+teaching: 60
+exercises: 60
 questions:
 - "What is Principal Component Analysis (PCA)?"
 - "How can I compute a PCA using R?"
 - "What are PCA loadings and scores? How to make a plot using scores and loadings?"
 objectives:
-- "."
+- "Understand what are Principal Components and how they are built."
+- "Recognize how valuable a PCA score plot can be to relate samples to variation in the dataset."
 keypoints:
 - ""
 ---
@@ -24,8 +25,8 @@ keypoints:
   - [2.2 Performing the PCA analysis](#22-performing-the-pca-analysis)
   - [2.3 Number of components to extract: the scree plot](#23-number-of-components-to-extract-the-scree-plot)
   - [2.4 PCA score plot](#24-pca-score-plot)
-  - [2.4 Genes most related to PCs](#24-genes-most-related-to-pcs)
-  - [2.4 PCA loading plot](#24-pca-loading-plot)
+  - [2.5 Genes most related to PCs](#25-genes-most-related-to-pcs)
+  - [2.6 PCA loading plot](#26-pca-loading-plot)
 - [3. Time to practice](#3-time-to-practice)
 - [4. References](#4-references)
 
@@ -464,7 +465,7 @@ We do see some groupings among our tissues. In particular, it is quite clear tha
 
 <img src="../img/03-dataset-1-score-plot-with-names-pc2-pc3.png" alt="score plot for PC2 and PC3" width="50%">
 
-## 2.4 Genes most related to PCs
+## 2.5 Genes most related to PCs
 
 Since the principal components are built using weighted combinations of the initial variables (genes here), it is possible to retrieve these variable coefficients that are called "loadings".
 
@@ -476,14 +477,14 @@ Let's extract the 10 genes with the highest contribution to PC1, PC2 and PC3 for
 
 ~~~
 loadings <- pca$loadings %>%
-  rownames_to_column("gene") 
+  rownames_to_column("gene_id") 
 
 loadings[1:5,1:5]
 ~~~
 {: .language-r}
 
 ~~~
-          gene          PC1           PC2           PC3           PC4
+            gene_id          PC1           PC2           PC3           PC4
 1 ENSG00000223972.4  0.006996176  0.0057920043 -0.0006521386 -1.058243e-03
 2 ENSG00000227232.4 -0.007557482 -0.0005034083  0.0048543880  1.814302e-03
 3 ENSG00000243485.2  0.007485112  0.0034005692 -0.0005971600 -8.105314e-05
@@ -541,7 +542,7 @@ Here are the 10 genes most related to PC1 and PC2 according to their absolute lo
 {: .output}
 
 
-## 2.4 PCA loading plot
+## 2.6 PCA loading plot
 
 These 20 genes can be plotted as a loading plot. 
 ~~~
