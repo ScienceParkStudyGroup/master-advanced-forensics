@@ -89,11 +89,10 @@ You will work on a RNA-seq dataset from the GTEx database version 7 (June 30, 20
 # Credits
 
 ## Dataset
-The original RNA-seq dataset used is called _GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.gct.gz_ and comes from the GTEx portal [link to dataset](https://storage.googleapis.com/gtex_analysis_v7/rna_seq_data/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.gct.gz). This dataset is pre-processed as gene TPM medians per tissue are already computed. 
+The original RNA-seq dataset used is called _GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.gct.gz_ and comes from the GTEx portal. This dataset is pre-processed as gene TPM medians per tissue are already computed. 
 
 It is used in the original publication from Ahn et al. 2019 that is used as a roadmap:     
 Ahn, J., Wu, H. & Lee, K. Integrative Analysis Revealing Human Adipose-Specific Genes and Consolidating Obesity Loci. Sci Rep 9, 3087 (2019). [Link](https://doi.org/10.1038/s41598-019-39582-8). 
-
 
 ## Teaching materials
 This lesson has been formatted according to the [Carpentries Foundation](https://carpentries.org/) lesson template and following their recommendations on how to teach researchers good practices in programming and data analysis.   
