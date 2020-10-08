@@ -332,7 +332,7 @@ ggplot(exp_var_df, aes(x = PC, y = exp_var, label = PC)) +
 ~~~
 {: .language-r}
 
-<img src="../img/02-pca-all-components.png" alt="screeplot with all principal components (n = 53)" width="50%">
+<img src="../img/03-pca-all-components.png" alt="screeplot with all principal components (n = 53)" width="50%">
 
 > ## Exercise
 > Based on the last plot, how many PCs do you think are necessary to catch most of the variation in the data?
