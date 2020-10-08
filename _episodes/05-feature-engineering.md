@@ -216,6 +216,7 @@ In total, you should have __195__ genes with a significant positive fold change 
 > 1. Filter the original dataset to keep only the 195 adipose-related genes.
 > 2. Convert to matrix and scale the matrix so that gene expression values become comparable. 
 > 3. Build a heatmap using your own clustering method (or the default one from `pheatmap()`)
+> 4. Now try to keep only the top 20 genes with the highest fold change and rebuild your heatmap.  
 {: .challenge}
 
 
