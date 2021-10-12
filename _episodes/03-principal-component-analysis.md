@@ -117,6 +117,8 @@ For convenience we use a very rudimentary (own) implementation implementation of
 ~~~
 # define a custom R function called "mypca()""
 mypca <- function(x, center = TRUE, scale = TRUE){  
+  # Samples should be in rows
+  # Variables in the columns
   
   # remove columns containing only 0 values
   # not informative + cause svd() error
@@ -226,6 +228,7 @@ p
 From the loading plot for PC1 it is clear that `Petal.Length` is the most important factor while `Sepal.Width` is the one which is least important. Because PC1 explains 92.5 % of the total variance we can conclude that `Petal.Length` is the most important factor that separates the three groups of flowers.   
 There are many more things to learn on PCA (e.g. scaling, filtering) but that is out of the scope of these exercises. 
 
+<br> 
 
 # 2. PCA analysis on dataset #1
 
@@ -304,7 +307,7 @@ pca <- mypca(x = df_expr_transposed,
 {: .language-r}
 
 Please not that centering and scaling are set using the `center = TRUE` and `scale = TRUE` arguments.   
-This ensures that all genes will have a mean approximately equal to 0 and a standard deviation equal to 1. 
+
 
 ## 2.3 Number of components to extract: the scree plot
 
@@ -313,7 +316,9 @@ A scree plot is useful to determine the number of principal components to retain
 
 A scree plot displays the explained variance (in %) as a factor of the number of PCs in the form of a downward curve. if an "elbow" can be seen on the curve with a flat line afterwards, you can retain the number of PCs that is indicated by the "elbow".
 
-Mathematically, the maximum number of PCs that can be built is equal to the matrix rank (number of linearly independent columns of a matrix). In practice, this is equal to the minimum of the number of rows and columns.   
+> ## Maximum number of Principal Components
+> Mathematically, the maximum number of PCs that can be built is equal to the matrix rank (number of linearly independent columns of a matrix). In practice, this is equal to the minimum of the number of rows and columns.   
+{: .callout}
 
 In our example, our `df_expr_transposed` dataset has 10 rows (tissues) and 56,202 columns (genes): therefore, we can at best build 10 PCs.  
 The first PC should account for the largest possible variance in the data set, the second for the second largest, etc.

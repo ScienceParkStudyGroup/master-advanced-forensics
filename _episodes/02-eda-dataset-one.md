@@ -86,7 +86,7 @@ This should give you __56,202 genes__ (probes) and __53 tissues__ (55 -2 columns
 
 How did R "understand" your different data types? 
 ~~~
-glimpse(df)
+str(df)
 ~~~
 {: .language-r}
 
@@ -124,6 +124,13 @@ head(n = 5)
 
 For big matrix, do `df_expr[1:5,1:5]` to show the first five lines and five columns for instance. 
 
+> ## Tip
+> A much more complete view of the data can be obtained with the `skim()` function from the `skimr` package.  
+> Try it: `skim(df_expr)`  
+{: .callout}
+
+<br> 
+
 # 3. Data exploration 
 
 ## 3.1 Simple statistical metrics
@@ -138,7 +145,7 @@ We are first going to compute a few descriptive metrics followed by some plottin
    - average 
    - median  
 >  
-> Hint: make your dataset tidy first and use the `%>%` operator to chain operations on your dataframe. 
+> Hint: make your dataset tidy first with `pivot_longer` and use the `%>%` operator to chain operations on your dataframe. 
 >
 > > ## Solution
 > > ~~~
@@ -160,8 +167,8 @@ We are first going to compute a few descriptive metrics followed by some plottin
 > >      max   min average median
 > >    <dbl> <dbl>   <dbl>  <dbl>
 > >  246600  0    16.6    0.00490
-> >~~ 
-> > {: .output}
+> >~~~ 
+> > {: .language-r}
 > {: .solution}
 {: .challenge}
 
@@ -170,7 +177,7 @@ We are first going to compute a few descriptive metrics followed by some plottin
 > 2. Do you think it can have an influence on data representation? If yes, what sort of bias can it introduce?
 > 
 > > ## Solution
-> > 1. As the maximum value is equal to 246600 and the minimum to 0, these data are heavily spread on several orders of magnitude.
+> > 1. As the maximum value is equal to 246,600 and the minimum to 0, these data are heavily spread on several orders of magnitude.
 > > 2. Since you will have to represent gene expression values using a common scale, it might be difficult to represent both low and very high expression values. One solution is to scale data or to use a transformation e.g. $$log_{10}$$. 
 > {: .solution}
 {: .challenge}
@@ -269,7 +276,7 @@ df_tidy %>%
 ~~~
 {: .language-r} 
 
-
+<br>
 
 # 4. Describing relationships between the different variables
 

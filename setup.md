@@ -64,12 +64,11 @@ So first thing first, we need to install Docker itself.
 >
 > 1. First, install [Docker desktop](https://www.docker.com/products/docker-desktop) for your operating system. If not possible, install the Docker Toolbox (see above). 
 > 2. If needed, install Shell Bash: [follow these instructions](http://swcarpentry.github.io/shell-novice/setup.html).
-> 3. Open a new Shell Bash window and navigate to a folder that will be your workspace. For instance, you could create a folder named `rnaseq-tutorial/` on your Desktop and move inside with the Shell using `cd ~/Desktop/rnaseq-tutorial/`. 
-> 4. In a Shell Bash window, type the following command: `docker run --rm --name rstudio_instance -v $PWD:/home/rstudio/ -e PASSWORD=mypwd -p 8787:8787 scienceparkstudygroup/master-advanced-forensics:latest`. This will download a Docker image for the course, create and run a container where RStudio will be running.   
+> 3. Open a new Shell Bash window and navigate to a folder that will be your workspace. For instance, you could create a folder named `forensics/` on your Desktop and move inside with the Shell using `cd ~/Desktop/forensics/`. 
+> 4. In a Shell Bash window, type the following command: `docker run --detach --rm --name rstudio_instance -v $PWD:/home/rstudio/ -e PASSWORD=mypwd -p 8787:8787 mgalland/docker-for-teaching:forensics-r-latest`. This will download a Docker image for the course, create and run a container where RStudio will be running.   
 > 4. Navigate to [http://localhost:8787](http://localhost:8787) in your web browser. You should have an RStudio session running. Type `rstudio` as the user name and `mypwd` as your password. 
 > 5. To quit, close the web browser window where RStudio is running and exit the Shell too. 
 {: .prereq}
-
 
 
 > ## Important note
@@ -82,6 +81,7 @@ So first thing first, we need to install Docker itself.
 __Docker command-line explanations:__  
 - The `--rm` removes the container when it has been run. No need to store it into your computer after use.      
 - The `--name` gives a name to the running container for easy retrieval.  
+- The `--detach` runs the container in the background.   
 - The `-p 8787:8787` follow the format `-p host_port:container_port`. Therefore the port 8787 inside the container will be exposed to the outside port on the host machine. That way, the running instance of RStudio can be access through the <IP address>:port format.
 
 <br>
